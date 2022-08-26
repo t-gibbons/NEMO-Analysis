@@ -1,12 +1,11 @@
 """
-all_transport_calcuations.py
+water_mass_transport.py
 author: Tahya Weiss-Gibbons
 
-Calculate the volume, freshwater, heat and salt transport across a section for ANHA4
-Need to provide the start and end model grid points, and a straight line in the model grid will be calculated from there
-Outputs netCDF files with the output
-
+Calculate the transport across a straight line section of a water mass
+Gives volume, heat, freshwater and salt transport of the water mass
 """
+
 import math
 import datetime
 import numpy as np
@@ -47,7 +46,7 @@ def section_calculation(x1, x2, y1, y2):
 def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, startmonth=1, startday=5):
     figs_path = '/project/6007519/weissgib/plotting/figs/transports/'
     path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
-    other_path = '/project/6007519/weissgib/plotting/'
+    other_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/'
 
     start_time = datetime.date(startyear, startmonth, startday)
 
@@ -130,6 +129,14 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     #section = 'siberian_shelf'
     #ii, jj = section_calculation(335,391,687,671)
 
+    #water mass definition
+    water_mass = 'transitional_water'
+    T = 2
+    S = 33.7
+    T_max = False
+    S_max = False
+    north = False
+
     t = du.dims['time_counter']
     total_volume = []
     total_freshwater = []
@@ -165,6 +172,12 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
             v = vt.isel(y=j1, x=i1)
             v = v.rename('vel')
             v = v.rename({'depthv': 'depth'})
+            
+            #mask from water mass definition
+            if north:
+                v = v.where(v > 0, np.nan)
+            else:
+                v = v.where(v < 0, np.nan)
 
             cell_thickness = cell_thickness_u[:,j1,i1]
             cell_width = np.ones(v.shape)*e1v[j1,i1]
@@ -174,9 +187,30 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
             sal2 = dt['vosaline'].isel(y_grid_T=j1, x_grid_T=i1+1)
             sal = (sal1+sal2)/2
 
+            sal = sal.rename({'deptht': 'depth'})
+
             temp1 = dt['votemper'].isel(y_grid_T=j1, x_grid_T=i1)
             temp2 = dt['votemper'].isel(y_grid_T=j1, x_grid_T=i1+1)
             temp = (temp1+temp2)/2
+
+            temp = temp.rename({'deptht': 'depth'})
+
+            if S_max:
+                v = v.where(sal < S, np.nan)
+                sal = sal.where(sal < S, np.nan)
+                temp = temp.where(sal < S, np.nan)
+            else: 
+                v = v.where(sal > S, np.nan)
+                sal = sal.where(sal > S, np.nan)
+                temp = temp.where(sal > S, np.nan)
+            if T_max:
+                v = v.where(temp < T, np.nan)
+                sal = sal.where(temp < T, np.nan)
+                temp = temp.where(temp < T, np.nan)
+            else:
+                v = v.where(temp > T, np.nan)
+                sal = sal.where(temp > T, np.nan)
+                temp = temp.where(temp > T, np.nan)
 
         elif i1 == i1:
 
@@ -196,12 +230,34 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
             sal2 = dt['vosaline'].isel(y_grid_T=j1+1, x_grid_T=i1)
             sal = (sal1+sal2)/2
 
+            sal = sal.rename({'deptht': 'depth'})
+
             temp1 = dt['votemper'].isel(y_grid_T=j1, x_grid_T=i1)
             temp2 = dt['votemper'].isel(y_grid_T=j1+1, x_grid_T=i1)
             temp = (temp1+temp2)/2
 
-        sal = sal.rename({'deptht': 'depth'})
-        temp = temp.rename({'deptht': 'depth'})
+            temp = temp.rename({'deptht': 'depth'})
+
+            if S_max:
+                v = v.where(sal < S, np.nan)
+                sal = sal.where(sal < S, np.nan)
+                temp = temp.where(sal < S, np.nan)
+            else:
+                v = v.where(sal > S, np.nan)
+                sal = sal.where(sal > S, np.nan)
+                temp = temp.where(sal > S, np.nan)
+            if T_max:
+                v = v.where(temp < T, np.nan)
+                sal = sal.where(temp < T, np.nan)
+                temp = temp.where(temp < T, np.nan)
+            else:
+                v = v.where(temp > T, np.nan)
+                sal = sal.where(temp > T, np.nan)
+                temp = temp.where(temp > T, np.nan)
+
+
+        #sal = sal.rename({'deptht': 'depth'})
+        #temp = temp.rename({'deptht': 'depth'})
 
         #using a reference salinity of 34.8
         fwc = (34.8-sal)/34.8
@@ -228,6 +284,7 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
         total_heat.append(h)
         total_salt.append(s)
 
+
     #now sum the data at each location    
     volume_transport = total_volume[0]
     freshwater_transport = total_freshwater[0]
@@ -249,18 +306,16 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     print(volume_transport.mean(dim='time_counter').values)
 
     #and output calcualted data to a netcdf file
-    volume_transport.to_netcdf(figs_path+section+'_volume_transport_'+runid+'.nc')
-    freshwater_transport.to_netcdf(figs_path+section+'_freshwater_transport_'+runid+'.nc')
-    heat_transport.to_netcdf(figs_path+section+'_heat_transport_'+runid+'.nc')
-    salt_transport.to_netcdf(figs_path+section+'_salt_transport_'+runid+'.nc')
+    volume_transport.to_netcdf(figs_path+section+'_'+water_mass+'_volume_transport_'+runid+'.nc')
+    freshwater_transport.to_netcdf(figs_path+section+'_'+water_mass+'_freshwater_transport_'+runid+'.nc')
+    heat_transport.to_netcdf(figs_path+section+'_'+water_mass+'_heat_transport_'+runid+'.nc')
+    salt_transport.to_netcdf(figs_path+section+'_'+water_mass+'_salt_transport_'+runid+'.nc')
     
     dv.close()
     du.close()
-
-
 			
 if __name__ == "__main__":
-    #transport_calculations(runid='EPM101', endyear=2019, endmonth=4, endday=5)
-    #transport_calculations(runid='EPM102', endyear=2019, endmonth=6, endday=9)
+    transport_calculations(runid='EPM101', endyear=2019, endmonth=4, endday=5)
+    transport_calculations(runid='EPM102', endyear=2019, endmonth=6, endday=9)
     transport_calculations(runid='EPM014', endyear=2019, endmonth=8, endday=23)
     transport_calculations(runid='EPM015', endyear=2019, endmonth=12, endday=31)
