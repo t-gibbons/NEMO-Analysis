@@ -1,3 +1,7 @@
+"""
+Creates a map of the difference between the freshwater content between two model runs
+Need to have already calculated the freshwater content in these runs
+"""
 import numpy as np
 import xarray as xr
 import netCDF4 as nc
@@ -6,8 +10,14 @@ import matplotlib.path as mpath
 import cartopy.crs as ccrs
 import cartopy.feature as feature
 
+###this is for running script backend###
+import matplotlib
+matplotlib.use('Agg')
+###----------------------------------###
+
 path = '/project/6007519/weissgib/plotting/data_files/freshwater_content/'
-#runids = {'CGRF': ['EPM015', 'EPM101'], 'ERA': ['EPM014', 'EPM102'] }
+fig_path = '/project/6007519/weissgib/plotting/fwc_figs/'
+
 runids = {'CGRF': ['EPM151', 'EPM101'], 'ERA': ['EPM152', 'EPM102'] }
 
 #read in the mesh grid file
@@ -23,20 +33,18 @@ for atmo in runids:
     #read in the model files
     print(atmo)
 
-    dai = path+runids[atmo][0]+'_annual_avg_fwc_200m.nc'
-    hype = path+runids[atmo][1]+'_annual_avg_fwc_200m.nc'
+    dai = path+runids[atmo][0]+'_fwc_34.8_isohaline_0m.nc'
+    hype = path+runids[atmo][1]+'_fwc_34.8_isohaline_0m.nc'
 
     dai_data = xr.open_dataset(dai)
     hype_data = xr.open_dataset(hype)
 
     #take an overall average
-    dai_mean = dai_data.sel(year=slice("2017", "2019")).mean('year')
-    hype_mean = hype_data.sel(year=slice("2017", "2019")).mean('year')
+    dai_mean = dai_data.mean('time_counter')
+    hype_mean = hype_data.mean('time_counter')
 
     dd = dai_mean['vosaline'].values
     hd = hype_mean['vosaline'].values
-    print(dd)
-    print(hd)
 
     diff = dd-hd
 
@@ -65,8 +73,7 @@ for atmo in runids:
     cb = plt.colorbar(p1,cax=ax_cb, orientation='vertical')
     cb.ax.set_ylabel('Freshwater Content (m)')
     ax.gridlines()
-    #plt.show()
-    plt.savefig(path+atmo+'_2017_2019_diff_fwc.png')
+    plt.savefig(fig_path+atmo+'_hype_diff_fwc.png')
     plt.clf()
 
     dai_data.close()
