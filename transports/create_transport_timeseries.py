@@ -8,10 +8,11 @@ import matplotlib.pyplot as plt
 
 #get list of all data files
 
-root_dir = '/project/6000276/weissgib/transports/'
-#root_dir = '/project/6007519/weissgib/plotting/figs/transports/'
+#root_dir = '/project/6000276/weissgib/transports/'
+root_dir = '/project/6007519/weissgib/plotting/figs/transports/'
+fig_path = '/project/6007519/weissgib/plotting/fwc_figs/'
 
-files = glob.glob(root_dir+'fram_strait_heat_transport_*.nc')
+files = glob.glob(root_dir+'fram_strait_freshwater_transport_*.nc')
 
 #also plot observed values
 obs_davis = False 
@@ -27,7 +28,8 @@ for f in files:
     file_name = file_name.replace('.nc', '')
     exp = file_name[-6:]
     print(exp)
-     
+    
+    """
     if exp == 'EPM101':
         #exp = 'HYPE,CGRF'
         exp = 'No river water temp'
@@ -40,7 +42,9 @@ for f in files:
     if exp == 'EPM015':
         exp = 'Dai and Trenberth,CGRF'
         continue
+    """
     if exp == 'ETW101':
+        continue
         exp = 'River water temp'
    
     d = xr.open_dataset(f)
@@ -62,8 +66,8 @@ if obs_davis:
     obs_path = '/project/6007519/weissgib/plotting/data_files/observations/DS0413_dOAtrans.mat'
 
     od = scipy.io.loadmat(obs_path)
-    #fw_transport = od['FW_dtrans'][:,0]*0.001
-    fw_transport = od['V_dtrans'][:,0]
+    fw_transport = od['FW_dtrans'][:,0]*0.001
+    #fw_transport = od['V_dtrans'][:,0]
     dates = od['dates'][0,:]
 
     timestamps = pd.to_datetime(dates-719529, unit='D')
@@ -157,8 +161,8 @@ print(annual_avg)
 avg.plot()
 plt.grid(True)
 plt.title('Fram Strait')
-plt.ylabel('heat transport')
+plt.ylabel('freshwater transport')
 
 #plt.show()
-plt.savefig('time_series_heat_transport_fram_strait_temp.png')
+plt.savefig(fig_path+'time_series_freshwater_transport_fram_strait.png')
 plt.clf()

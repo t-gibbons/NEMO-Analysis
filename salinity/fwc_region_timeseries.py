@@ -22,7 +22,8 @@ path = '/project/6007519/weissgib/plotting/data_files/freshwater_content/'
 
 fig_path = '/project/6007519/weissgib/plotting/figs/timeseries/'
 
-mask_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/regions_mask.nc'
+#mask_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/regions_mask.nc'
+mask_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_temp_regions_mask.nc'
 mf = nc.Dataset(mask_file)
 
 experiment = []
@@ -30,9 +31,9 @@ region = []
 fwc = []
 date = []
 
-#regions = {'ls_mask': 'Labrador Sea'}
+regions = {'bs_mask': 'Mackenzie Region', 'kara_mask': 'Kara Sea', 'laptev_mask': 'Laptev Sea', 'bs_east_mask': 'Eastern Bering Strait'}
 
-regions = {'caa_mask': 'Canadian Arctic Archipelago', 'ca_mask': 'Central Arctic', 'cs_mask': 'Canadian Shelf', 'cb_mask': 'Canadian Basin', 'eb_mask': 'Eurasian Basin', 'ss_mask': 'Siberian Shelf', 'ds_mask': 'Davis Strait', 'hb_mask': 'Hudson Bay', 'bs_mask': 'Bering Strait', 'ls_mask': 'Labrador Sea', 'ns_mask': 'Nares Strait', 'fs_mask': 'Fram Strait', 'lc_mask': 'Labrador Current'}
+#regions = {'caa_mask': 'Canadian Arctic Archipelago', 'ca_mask': 'Central Arctic', 'cs_mask': 'Canadian Shelf', 'cb_mask': 'Canadian Basin', 'eb_mask': 'Eurasian Basin', 'ss_mask': 'Siberian Shelf', 'ds_mask': 'Davis Strait', 'hb_mask': 'Hudson Bay', 'bs_mask': 'Bering Strait', 'ls_mask': 'Labrador Sea', 'ns_mask': 'Nares Strait', 'fs_mask': 'Fram Strait', 'lc_mask': 'Labrador Current'}
 
 for exp in runids:
     fwc_file = path+exp+'_fwc_34.8_isohaline_0m.nc'

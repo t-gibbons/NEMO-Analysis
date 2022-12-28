@@ -47,7 +47,7 @@ def section_calculation(x1, x2, y1, y2):
 def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, startmonth=1, startday=5):
     figs_path = '/project/6007519/weissgib/plotting/figs/transports/'
     path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
-    other_path = '/project/6007519/weissgib/plotting/'
+    other_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/'
 
     start_time = datetime.date(startyear, startmonth, startday)
 
@@ -115,8 +115,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     #section = 'fram_strait'
     #ii, jj = section_calculation(304, 360, 503, 526)
 
-    section = 'davis_strait'
-    ii, jj = section_calculation(175,214,443,443)
+    #section = 'davis_strait'
+    #ii, jj = section_calculation(175,214,443,443)
 
     #section = 'bering_strait'
     #ii,jj = section_calculation(222, 237, 783, 791)
@@ -129,6 +129,9 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
 
     #section = 'siberian_shelf'
     #ii, jj = section_calculation(335,391,687,671)
+
+    section = 'barrow_strait'
+    ii, jj = section_calculation(156,164,550,550)
 
     t = du.dims['time_counter']
     total_volume = []
@@ -260,7 +263,7 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
 
 			
 if __name__ == "__main__":
-    #transport_calculations(runid='EPM101', endyear=2019, endmonth=4, endday=5)
-    #transport_calculations(runid='EPM102', endyear=2019, endmonth=6, endday=9)
-    transport_calculations(runid='EPM014', endyear=2019, endmonth=8, endday=23)
-    transport_calculations(runid='EPM015', endyear=2019, endmonth=12, endday=31)
+    transport_calculations(runid='EPM151', endyear=2020, endmonth=12, endday=31)
+    transport_calculations(runid='EPM152', endyear=2018, endmonth=12, endday=31)
+    #transport_calculations(runid='EPM014', endyear=2019, endmonth=8, endday=23)
+    #transport_calculations(runid='EPM015', endyear=2019, endmonth=12, endday=31)
