@@ -209,8 +209,8 @@ def salinity_anamoly_plot(runid, endyear, endmonth, endday, startyear=2002, star
 
         X,Y,masked_anamoly = z_masked_overlap(ax,lons,lats,anamoly,source_projection=ccrs.Mercator(central_longitude=-45))
 
-        #p1 = ax.pcolormesh(lons,lats,anamoly,transform=ccrs.PlateCarree(), cmap='bwr', vmin=-0.2, vmax=0.2)
-        p1 = ax.contourf(X,Y,masked_anamoly,transform=ccrs.PlateCarree(), cmap='bwr', levels=[-0.2,-0.15,-0.1,-0.05,0,0.05,0.1,0.15,0.2])
+        p1 = ax.pcolormesh(lons,lats,anamoly,transform=ccrs.PlateCarree(), cmap='bwr', vmin=-0.5, vmax=0.5)
+        #p1 = ax.contourf(X,Y,masked_anamoly,transform=ccrs.PlateCarree(), cmap='bwr', levels=[-0.2,-0.15,-0.1,-0.05,0,0.05,0.1,0.15,0.2])
         ax.set_extent([-100,30,20,80], crs=ccrs.PlateCarree())
         ax_cb = plt.axes([0.92, 0.25, 0.015, 0.5])
         cb = plt.colorbar(p1,cax=ax_cb, orientation='vertical')

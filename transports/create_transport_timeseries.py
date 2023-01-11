@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 root_dir = '/project/6007519/weissgib/plotting/figs/transports/'
 fig_path = '/project/6007519/weissgib/plotting/fwc_figs/'
 
-files = glob.glob(root_dir+'fram_strait_freshwater_transport_*.nc')
+files = glob.glob(root_dir+'nares_strait_freshwater_transport_*.nc')
 
 #also plot observed values
 obs_davis = False 
@@ -160,9 +160,9 @@ print(annual_avg)
 #rd["2009-01-03":"2010'12'31"].plot()
 avg.plot()
 plt.grid(True)
-plt.title('Fram Strait')
+plt.title('Nares Strait')
 plt.ylabel('freshwater transport')
 
 #plt.show()
-plt.savefig(fig_path+'time_series_freshwater_transport_fram_strait.png')
+plt.savefig(fig_path+'time_series_freshwater_transport_nares_strait.png')
 plt.clf()
