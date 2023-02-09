@@ -18,7 +18,7 @@ matplotlib.use('Agg')
 path = '/project/6007519/weissgib/plotting/data_files/freshwater_content/'
 fig_path = '/project/6007519/weissgib/plotting/fwc_figs/'
 
-runids = {'CGRF': ['EPM151', 'EPM101'], 'ERA': ['EPM152', 'EPM102'] }
+runids = {'CGRF': ['EPM151', 'EPM015'], 'ERA': ['EPM152', 'EPM014'] }
 
 #read in the mesh grid file
 grid_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/ANHA4_mesh_mask.nc'
@@ -73,7 +73,7 @@ for atmo in runids:
     cb = plt.colorbar(p1,cax=ax_cb, orientation='vertical')
     cb.ax.set_ylabel('Freshwater Content (m)')
     ax.gridlines()
-    plt.savefig(fig_path+atmo+'_hype_diff_fwc.png')
+    plt.savefig(fig_path+atmo+'_new_diff_fwc.png')
     plt.clf()
 
     dai_data.close()

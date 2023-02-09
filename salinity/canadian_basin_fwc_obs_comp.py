@@ -99,6 +99,7 @@ df['date'] = pd.to_datetime(df['date'])
 rd = df.pivot(index='date', columns='experiment', values='fwc')
 
 avg = rd.resample('M').mean()
+rd['obs'] = rd['obs'].interpolate(method='linear', limit=8)
 
 plt.plot(rd['obs'], label='observations')
 

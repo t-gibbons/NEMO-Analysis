@@ -56,6 +56,7 @@ for exp in runids:
 
         masked_fwc = ma.masked_where(rmask==1,fwc_data)
         regional_fwc_ts = masked_fwc.mean(axis=(1,2))
+        print(regional_fwc_ts.shape)
         
         for i in range(t):
             experiment.append(long_names[exp])
