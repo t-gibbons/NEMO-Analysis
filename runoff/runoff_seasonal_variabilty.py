@@ -33,13 +33,13 @@ for y in range(start_year, end_year+1):
 old_runoff = xr.open_mfdataset(files)
 
 #and the mask files for getting coastal regions
-mask_path = '/project/6007519/weissgib/plotting/runoff_regions_mask.nc'
+mask_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_temp_regions_mask.nc'
 #mask_path = '/project/6007519/weissgib/plotting/regions_mask.nc'
 
 mask_data = xr.open_mfdataset(mask_path)
 
-#masks = {'ss_mask': 'Siberian Shelf', 'cs_mask': 'Canadian Shelf'}
-masks = {'hb_mask': 'Hudson Bay and Greenland', 'caa_mask': 'Canadian Arctic Archipelago', 'bs_mask': 'Bering Strait', 'ec_mask': 'Eastern Coast', 'nc_mask': 'Norway and British Isles'}
+masks = {'bs_mask': 'Mackenzie Region', 'kara_mask': 'Kara Sea', 'laptev_mask': 'Laptev Sea', 'bs_east_mask': 'Eastern Bering Strait'}
+#masks = {'hb_mask': 'Hudson Bay and Greenland', 'caa_mask': 'Canadian Arctic Archipelago', 'bs_mask': 'Bering Strait', 'ec_mask': 'Eastern Coast', 'nc_mask': 'Norway and British Isles'}
 
 #lets make time series of the average monthly runoff
 for m in masks:
