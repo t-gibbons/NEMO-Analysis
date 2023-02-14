@@ -12,10 +12,10 @@ import matplotlib.pyplot as plt
 root_dir = '/project/6007519/weissgib/plotting/figs/transports/'
 fig_path = '/project/6007519/weissgib/plotting/fwc_figs/'
 
-files = glob.glob(root_dir+'nares_strait_freshwater_transport_*.nc')
+files = glob.glob(root_dir+'davis_strait_freshwater_transport_*.nc')
 
 #also plot observed values
-obs_davis = False 
+obs_davis = True 
 obs_nares = False
 obs_barrow = False
 
@@ -29,24 +29,26 @@ for f in files:
     exp = file_name[-6:]
     print(exp)
     
-    """
+    
     if exp == 'EPM101':
         #exp = 'HYPE,CGRF'
         exp = 'No river water temp'
+        continue
     if exp == 'EPM102':
         exp = 'HYPE,ERA'
         continue
+    if exp == 'EPM151':
+        exp = 'HYPE, CGRF'
+    if exp == 'EPM152':
+        exp = 'HYPE, ERA'
     if exp == 'EPM014':
         exp = 'Dai and Trenberth,ERA'
-        continue
     if exp == 'EPM015':
         exp = 'Dai and Trenberth,CGRF'
-        continue
-    """
     if exp == 'ETW101':
         continue
         exp = 'River water temp'
-   
+    
     d = xr.open_dataset(f)
     #v = (d['vel'].values)
     v = d['__xarray_dataarray_variable__'].values
@@ -147,6 +149,7 @@ print(df)
 
 mean = df.groupby('experiment', as_index=False)['volume_transport'].mean()
 print(mean)
+exit()
 
 #now lets make the time series for each region
 rd = df.pivot(index='date', columns='experiment', values='volume_transport')
@@ -160,9 +163,9 @@ print(annual_avg)
 #rd["2009-01-03":"2010'12'31"].plot()
 avg.plot()
 plt.grid(True)
-plt.title('Nares Strait')
+plt.title('Davis Strait')
 plt.ylabel('freshwater transport')
 
 #plt.show()
-plt.savefig(fig_path+'time_series_freshwater_transport_nares_strait.png')
+plt.savefig(fig_path+'time_series_freshwater_transport_davis_strait.png')
 plt.clf()

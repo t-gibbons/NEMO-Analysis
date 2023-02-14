@@ -76,7 +76,7 @@ def sea_ice_thickness_spatial(runid, endyear, endmonth, endday, startyear=2002, 
 
 def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2002, startmonth=1, startday=5):
 
-    figs_path = '/project/6000276/weissgib/sea_ice/'
+    figs_path = '/project/6007519/weissgib/plotting/sea_ice/'
 
     grid_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/ANHA4_mesh_mask.nc'
     mesh = nc.Dataset(grid_file)
@@ -86,14 +86,10 @@ def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2002, startmonth
 
     mesh.close()
 
-    #temp run
-    path_temp = "/project/6000276/weissgib/ANHA4/ANHA4-ETW101-S/"
+    #read temp and no temp run
+    path_temp = "/project/6007519/weissgib/ANHA4/ANHA4-ETW151-S/"
 
-    mdl_files = glob.glob(path_temp+'ANHA4-ETW101_icemod_*.nc')
-
-    d_temp = xr.open_mfdataset(mdl_files, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override') 
-    #no temp
-    path = "/project/6007519/pmyers/ANHA4/ANHA4-EPM101-S/"
+    path = "/project/6007519/pmyers/ANHA4/ANHA4-EPM151-S/"
     start_time = datetime.date(startyear, startmonth, startday)
 
     end_time = datetime.date(endyear, endmonth, endday)
@@ -113,11 +109,14 @@ def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2002, startmonth
         times.append(t)
 
     #and now make a list of model files to read
-    mdl_files = []
+    mdl_files_temp = []
+    mdl_files_notemp = []
     for t in times:
-        mdl_files.append(path+"ANHA4-EPM101_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
+        mdl_files_temp.append(path_temp+"ANHA4-ETW151_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
+        mdl_files_notemp.append(path+"ANHA4-EPM151_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
 
-    d_no_temp = xr.open_mfdataset(mdl_files, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
+    d_temp = xr.open_mfdataset(mdl_files_temp, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
+    d_no_temp = xr.open_mfdataset(mdl_files_notemp, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
 
     no_temp_avg = d_no_temp['iicethic'].resample(time_counter='Q-NOV').mean()
     temp_avg = d_temp['iicethic'].resample(time_counter='Q-NOV').mean()
@@ -174,4 +173,4 @@ def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2002, startmonth
 
 
 if __name__ == "__main__":
-    sea_ice_thickness_diff(2017, 12 ,31)
+    sea_ice_thickness_diff(2012, 12 ,31)
