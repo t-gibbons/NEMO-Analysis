@@ -140,6 +140,7 @@ def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2002, startmonth
         diff = diff[0,:,:]
 
         #north pole stero projection
+        """
         land_50m = feature.NaturalEarthFeature('physical', 'land', '50m', edgecolor='black', facecolor='gray', linewidth=0.5)
         projection=ccrs.NorthPolarStereo()
 
@@ -159,12 +160,25 @@ def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2002, startmonth
         verts = np.vstack([np.sin(theta), np.cos(theta)]).T
         circle = mpath.Path(verts * radius + center)
         ax.set_boundary(circle, transform=ax.transAxes)
+        """
+
+        #hudson bay projection
+        land_50m = feature.NaturalEarthFeature('physical', 'land', '50m', edgecolor='black', facecolor='gray', linewidth=0.5)
+        projection=projection=ccrs.Mercator(central_longitude=-80)
+
+        fig = plt.figure(figsize=(10, 9))
+        ax = plt.subplot(1, 1, 1, projection=projection)
+
+        ax.set_extent([-96,-68,50,67], crs=ccrs.PlateCarree())
+        ax.add_feature(land_50m, color=[0.8, 0.8, 0.8])
+        ax.coastlines(resolution='50m')
+
         p1 = ax.pcolormesh(lons, lats, diff, transform=ccrs.PlateCarree(), cmap='bwr', vmin=-0.5, vmax=0.5)
         ax_cb = plt.axes([0.92, 0.25, 0.015, 0.5])
         cb = plt.colorbar(p1, cax=ax_cb, orientation='vertical')
         cb.ax.set_ylabel('Sea Ice Thickness (m)')
         ax.gridlines()
-        plt.savefig(figs_path+'sea_ice_thickness_diff_'+season+'_'+st+'.png')
+        plt.savefig(figs_path+'sea_ice_thickness_diff_hb_'+season+'_'+st+'.png')
         #plt.show()
         plt.clf()
 
