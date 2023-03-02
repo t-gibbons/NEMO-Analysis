@@ -7,8 +7,8 @@ import cartopy.crs as ccrs
 import cartopy.feature as feature
 
 ###this is for running script backend###
-#import matplotlib
-#matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
 ###----------------------------------###
 
 def z_masked_overlap(axe, X, Y, Z, source_projection=None):
@@ -211,17 +211,16 @@ def salinity_anamoly_plot(runid, endyear, endmonth, endday, startyear=2002, star
         #v = np.arange(-0.5,0.5,0.025)
         v = [-0.22,-0.17,-0.12,-0.07,0.02,0.07,0.12,0.17,0.22]
 
-        #p1 = ax.pcolormesh(lons,lats,anamoly,transform=ccrs.PlateCarree(), cmap='bwr', vmin=-0.5, vmax=0.5)
+        p1 = ax.pcolormesh(lons,lats,anamoly,transform=ccrs.PlateCarree(), cmap='bwr', vmin=-0.2, vmax=0.2)
         #p1 = ax.contourf(X,Y,masked_anamoly,transform=ccrs.PlateCarree(), cmap='bwr', levels=[-0.2,-0.15,-0.1,-0.05,0,0.05,0.1,0.15,0.2])
-        p1 = ax.contour(X,Y,masked_anamoly,v,transform=ccrs.PlateCarree(),cmap='bwr')
+        #p1 = ax.contour(X,Y,masked_anamoly,v,transform=ccrs.PlateCarree(),cmap='bwr')
         ax.set_extent([-100,30,20,80], crs=ccrs.PlateCarree())
         ax_cb = plt.axes([0.92, 0.25, 0.015, 0.5])
         cb = plt.colorbar(p1,cax=ax_cb, orientation='vertical')
 
-        #plt.savefig(output_path+'salinity_anamoly_total_0_200_'+runid+'_'+str(years[y])+'.png')
-        plt.show()
+        plt.savefig(output_path+'salinity_anamoly_total_0_200_'+runid+'_'+str(years[y])+'.png')
+        #plt.show()
         plt.clf()
-        exit()
     
 if __name__ == "__main__":
     salinity_anamoly_plot(runid='EPM151', endyear=2019, endmonth=12, endday=31)
