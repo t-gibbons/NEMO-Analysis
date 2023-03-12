@@ -12,12 +12,12 @@ import matplotlib.pyplot as plt
 root_dir = '/project/6007519/weissgib/plotting/figs/transports/'
 fig_path = '/project/6007519/weissgib/plotting/fwc_figs/'
 
-files = glob.glob(root_dir+'davis_strait_freshwater_transport_*.nc')
+files = glob.glob(root_dir+'barrow_strait_freshwater_transport_*.nc')
 
 #also plot observed values
-obs_davis = True 
+obs_davis = False 
 obs_nares = False
-obs_barrow = False
+obs_barrow = True
 
 experiment = []
 transport = []
@@ -149,7 +149,6 @@ print(df)
 
 mean = df.groupby('experiment', as_index=False)['volume_transport'].mean()
 print(mean)
-exit()
 
 #now lets make the time series for each region
 rd = df.pivot(index='date', columns='experiment', values='volume_transport')
@@ -163,9 +162,9 @@ print(annual_avg)
 #rd["2009-01-03":"2010'12'31"].plot()
 avg.plot()
 plt.grid(True)
-plt.title('Davis Strait')
+plt.title('Barrow Strait')
 plt.ylabel('freshwater transport')
 
 #plt.show()
-plt.savefig(fig_path+'time_series_freshwater_transport_davis_strait.png')
+plt.savefig(fig_path+'time_series_freshwater_transport_barrow_strait.png')
 plt.clf()

@@ -4,7 +4,8 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-path = '/mnt/storage4/tahya/runoff/runoff_temp_files/'
+path = '/project/6007519/ANHA4-I/RUNOFF/HydroGFD_temp/'
+fig_path = '/project/6007519/weissgib/plotting/runoff_figs/'
 
 #constants
 cp = 4.184
@@ -28,21 +29,20 @@ for y in range(start_year, end_year+1):
 new_runoff = xr.concat(data, dim='time_counter')
 
 #model grid information for converting units
-grid_file = '/mnt/storage4/tahya/model_files/ANHA4_mesh_mask.nc'
+grid_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/ANHA4_mesh_mask.nc'
 mesh = xr.open_mfdataset(grid_file)
 
 e1v = mesh['e1v']
 e2u = mesh['e2u']
 
 #and the mask files for getting coastal regions
-mask_path = '/mnt/storage4/tahya/runoff/runoff_temp_regions_mask.nc'
-#mask_path = '/mnt/storage4/tahya/runoff/runoff_regions_mask_new.nc'
+mask_path = '/project/6000276/weissgib/model_files/runoff_temp_regions_mask.nc'
 
 mask_data = xr.open_mfdataset(mask_path)
 
 #masks = {'hb_mask': 'Hudson Bay', 'bs_mask': 'Mackenzie River Region', 'bs_east_mask': 'Eastern Bering Strait', 'laptev_mask': 'Laptev Sea'}
-masks = {'caa_mask': 'Canadian Arctic Archipelago','kara_mask': 'Kara Sea'}
-#masks = {'hb_mask': 'Hudson Bay', 'bs_mask': 'Mackenzie River Region', 'bs_east_mask': 'Eastern Bering Strait', 'laptev_mask': 'Laptev Sea', 'caa_mask': 'Canadian Arctic Archipelago','kara_mask': 'Kara Sea'}
+#masks = {'caa_mask': 'Canadian Arctic Archipelago','kara_mask': 'Kara Sea'}
+masks = {'hb_mask': 'Hudson Bay', 'bs_mask': 'Mackenzie River Region', 'bs_east_mask': 'Eastern Bering Strait', 'laptev_mask': 'Laptev Sea', 'caa_mask': 'Canadian Arctic Archipelago','kara_mask': 'Kara Sea'}
 #masks = {'all_masks': 'All Mask Area'}
 
 total_heat_flux = []
@@ -92,11 +92,11 @@ for m in masks:
 plt.title('Average Monthly Heat Flux')
 plt.ylabel('heat flux (10^6 MJ)')
 plt.legend()
-plt.tight_layout()
 ax = plt.gca()
 ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-plt.savefig('large_region_heat_flux.png')
-
+plt.tight_layout()
+plt.savefig(fig_path+'all_region_heat_flux.png')
+#plt.show()
 
 new_runoff.close()
 mask_data.close()

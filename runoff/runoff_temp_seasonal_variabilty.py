@@ -7,14 +7,16 @@ import cartopy.crs as ccrs
 import cartopy.feature as feature
 
 #new runoff
-path = '/mnt/storage4/tahya/runoff/runoff_temp_files/'
+path = '/project/6007519/ANHA4-I/RUNOFF/HydroGFD_temp/'
+fig_path = '/project/6007519/weissgib/plotting/runoff_figs/'
 
 start_year = 2002
-end_year = 2016
+end_year = 2019
 data = []
+months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec']
 
-for y in range(start_year, end_year+1):
-    if y == 2011: continue
+for y in range(start_year, end_year):
+    #if y == 2011: continue
     files = path+'ANHA4_ReNat_HydroGFD_HBC_runoff_monthly_y'+str(y)+'.nc'
     print(files)
     ds = xr.open_mfdataset(files, decode_times=False)
@@ -28,12 +30,11 @@ new_runoff = new_runoff.where(new_runoff['rotemper'] > -999)
 new_runoff = new_runoff.where(new_runoff['runoff'] != 0)
 
 #and the mask files for getting coastal regions
-mask_path = '/mnt/storage4/tahya/runoff/runoff_temp_regions_mask.nc'
-#mask_path = '/project/6007519/weissgib/plotting/regions_mask.nc'
+mask_path = '/project/6000276/weissgib/model_files/runoff_temp_regions_mask.nc'
 
 mask_data = xr.open_mfdataset(mask_path)
 
-#masks = {'ss_mask': 'Siberian Shelf', 'cs_mask': 'Canadian Shelf'}
+#masks = {'bs_mask': 'Mackenzie River Region'}
 masks = {'hb_mask': 'Hudson Bay', 'caa_mask': 'Canadian Arctic Archipelago', 'bs_mask': 'Mackenzie River Region', 'bs_east_mask': 'Eastern Bering Strait', 'kara_mask': 'Kara Sea', 'laptev_mask': 'Laptev Sea'}
 
 #lets make time series of the average monthly runoff
@@ -47,17 +48,15 @@ for m in masks:
     print(hype_mean)
 
     nt = hype_mean.values
-
-    dn = hype_mean['month'].values
     
-    plt.plot(dn, nt, label='HYPE')
+    plt.plot(months, nt)
     x1,x2,y1,y2 = plt.axis()  
     plt.axis((x1,x2,-0.2,10))
 
     plt.title(masks[m])
     plt.ylabel('temperature (C)')
     #plt.show()
-    plt.savefig(m+'_monthly_average_runoff_temp.png')
+    plt.savefig(fig_path+m+'_monthly_average_runoff_temp.png')
     plt.clf()
 
 exit()

@@ -43,7 +43,7 @@ for m in masks:
     masked_runoff = new_runoff['rotemper'].where(md ==2)
     
     #get the maximum temp in this region
-    timeseries = masked_runoff.sum(('x', 'y'))
+    timeseries = masked_runoff.mean(('x', 'y'))
 
     hype_mean = timeseries.groupby('time_counter.month').mean()
 

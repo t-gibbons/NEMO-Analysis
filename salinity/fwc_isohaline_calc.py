@@ -37,7 +37,9 @@ def fwc_isohaline_calc(runid, endyear, endmonth, endday, startyear=2002, startmo
     mdl_files.remove(last_file)
     
     d = xr.open_mfdataset(mdl_files, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
+    print(d)
 
+    
     #also want to read in the mesh grid info
     mesh = nc.Dataset(grid_file)
 
@@ -107,9 +109,9 @@ def fwc_isohaline_calc(runid, endyear, endmonth, endday, startyear=2002, startmo
     t1 = tmp*dz_grid
 
     fwc = t1.sum(dim='deptht', skipna=True)
-
+    
     #lets just output the fwc to a netcdf
-    fwc.to_netcdf(fig_path+runid+'_fwc_34.8_isohaline_0m.nc')
+    #fwc.to_netcdf(fig_path+runid+'_fwc_34.8_isohaline_0m.nc')
 
 if __name__ == "__main__":
-    fwc_isohaline_calc(runid='ETW101', endyear=2019, endmonth=4, endday=5)
+    fwc_isohaline_calc(runid='ETW101', endyear=2003, endmonth=4, endday=5)
