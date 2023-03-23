@@ -23,6 +23,7 @@ rnfFile0 = importdata(['GeoInfo_',baysys_conf,'_',baysys_code,'_',baysys_domn,'.
 %rnfFile0(:,Arcticind)=[];
 
 rnfInfo.runoff       = rnfFile0(4,:); % annual runoff for each river
+rnfInfo.temp         = rnfFile0(5,:);   % annual water temp for each river, do I need this??
 rnfInfo.lon          = rnfFile0(3,:);
 rnfInfo.lat          = rnfFile0(2,:);
 rnfInfo.coast_buffer = coast_buffer;
@@ -101,8 +102,11 @@ netcdf.putVar(ncfid,varIDList(3),0,numel(timeCounter),timeCounter);
 %runoffMonthlyFile=importdata('/mnt/storage1/natasha/DATA/RIVER_RUNOFF/HYPEcal_HBC/monthlyQ-20170410_WFDEI.mat'); % ** CHANGE
 runoffMonthlyFile = importdata(['MonthlyDischarge_',baysys_conf,'_',baysys_code,'_',baysys_domn,'.mat']);% ** CHANGE
 runoffMonthlyFile = runoffMonthlyFile(:,3:end);
-%runoffMonthlyFile(:,Arcticind)=[];
 runoffMonthlyFile = runoffMonthlyFile(4:end,:);
+
+tempMonthlyFile = importdata(['MonthlyTemp_',baysys_conf,'_',baysys_code,'_',baysys_domn,'.mat']);
+tempMonthlyFile=tempMonthlyFile(:,3:end);
+tempMonthlyFile=tempMonthlyFile(4:end,:);
 
 NXGL    = 397; %x-dimesnion in runoffMonthlyFile -- number of discharge locations
 NYGL    = size(runoffMonthlyFile,1); %y-dimension in runoffMonthlyFile -- months from 1979 to 2010 ** CHANGE
@@ -127,7 +131,8 @@ for nmon = 1:numel(timeCounter)
     % read original runoff -- this would be my large HYPE csv file?
     % and I think I want to read 1 time step at a time (so read each row)
     cRunoff    = runoffMonthlyFile(nmon,:); % use nmon???? not sure about this. Data is m/s. cRunoff has runoff, lat and lon
-
+    cTemp      = tempMonthlyFile(nmon,:);
+    
     % what information do I need for this loop
    %*******
     % If 
@@ -142,9 +147,11 @@ for nmon = 1:numel(timeCounter)
     end
 
 %%
-    [modelRunoff,myRunoffInfo]=computeModelRunoff(cRunoff,myRunoffInfo,modelInfo,nClosestPT);
+    %[modelRunoff,myRunoffInfo]=computeModelRunoff(cRunoff,myRunoffInfo,modelInfo,nClosestPT);
+    [modelRunoff,modelTemp,myRunoffInfo]=computeModelRunoff(cRunoff,cTemp,myRunoffInfo,modelInfo,nClosestPT);
     modelRunoff(modelRunoff<0)=0;  % No negative runoff here
-    netcdf.putVar(ncfid,varIDList(5),[0 0 nmon-1],[NX NY 1],modelRunoff');
+    modelTemp(modelTemp<0)=0;  % No negative runoff here
+    netcdf.putVar(ncfid,varIDList(5),[0 0 nmon-1],[NX NY 1],modelTemp');
     socoefr(modelRunoff>1e-7)=0.5; % where NEMO will do enhanced mixing because the existence of runoff
 end
 netcdf.putVar(ncfid,varIDList(4),socoefr');

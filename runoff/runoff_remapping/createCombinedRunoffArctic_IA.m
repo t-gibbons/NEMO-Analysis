@@ -16,7 +16,7 @@ function createCombinedRunoffArctic_IA(baysys_code, baysys_conf, baysys_domn, YS
 
 % rnfDTpath='/mnt/storage0/xhu/PROGRAM/RUNOFF/GreenlandRunoff/IA/'; % original ANHA4 runoff path
 % rnfDTpath='/mnt/storage3/natasha/RUNOFF/BAYSYS_RUNS/Nat_Hist_Ctrl/'; % original ANHA4 runoff path
-rnfDTpath='/mnt/storage0/myers/ANALYSIS/BAMBER/ANHA4_runoff_monthly_combined_Dai_Trenberth_Bamber2016_';
+rnfDTpath='/mnt/storage4/tahya/runoff/make_runoff_files/null_files/ANHA4_runoff_monthly_combined_null_Dai_Trenberth_Bamber2016_';
 rnfGL=['ANHA4_',baysys_conf,'_',baysys_code,'_',baysys_domn,'_runoff_monthly_y',num2str(YS),'_y',num2str(YE),'.nc'];            % HBC runoff ** CHANGE
 GLmask=load('ANHA4_AHYPEmask.mat');                               % a mask file of HBC region -- CHANGE
 [NY,NX]=size(GLmask.tmask);

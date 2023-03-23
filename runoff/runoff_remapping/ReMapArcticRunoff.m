@@ -6,6 +6,8 @@ function ReMapArcticRunoff (baysys_code, baysys_conf, baysys_domn, YS, YE)
 %          2014-xx: modified for Greenland Runoff data, xianmin@ualberta.ca
 %          2015-07: added detailed comments, xianmin@ualberta.ca
 %          2016-04: modified for HBC case
+%          2022-11: remapping fixed for Arctic rivers
+%          2023-02: modified for water temperature
 
 %% STEP 1: 
 %  load the pre-defined coastal-buffer-polygons 
@@ -25,6 +27,7 @@ rnfFile0=importdata(['GeoInfo_',baysys_conf,'_',baysys_code,'_',baysys_domn,'.ma
 %Ind2Rmv=importdata('ArcticHYPE_Indices2Remove.mat');
 %rnfFile0(:,Ind2Rmv)=[];
 rnfInfo.runoff=rnfFile0(4,:); % annual runoff for each river
+rnfInfo.temp=rnfFile0(5,:);   % annual water temp for each river, do I need this??
 rnfInfo.lon=rnfFile0(3,:);
 rnfInfo.lat=rnfFile0(2,:);
 rnfInfo.coast_buffer=coast_buffer;
@@ -114,8 +117,11 @@ netcdf.putVar(ncfid,varIDList(3),0,numel(timeCounter),timeCounter);
 %runoffDailyFile =importdata('/mnt/storage4/shayna/Matlab/ResultDateLatLonMatrix_noleap.mat');
 
 runoffMonthlyFile = importdata(['MonthlyDischarge_',baysys_conf,'_',baysys_code,'_',baysys_domn,'.mat']);
+tempMonthlyFile = importdata(['MonthlyTemp_',baysys_conf,'_',baysys_code,'_',baysys_domn,'.mat']);
 runoffMonthlyFile=runoffMonthlyFile(:,3:end);
 runoffMonthlyFile=runoffMonthlyFile(4:end,:);
+tempMonthlyFile=tempMonthlyFile(:,3:end);
+tempMonthlyFile=tempMonthlyFile(4:end,:);
 %runoffMonthlyFile(:,Ind2Rmv)=[]; % remove rivers not in domain
 
 NXGL=size(runoffMonthlyFile,2); %x-dimesnion in runoffMonthlyFile -- number of discharge locations
@@ -153,8 +159,8 @@ volLevPTs=[200000 500000 300; ...
            0.0    1  1];
        
 KM3MonToMS=1e9/(24*3600*(365/12));  % factor to convert km^3/month to m^3/s --- not using
-myRunoffInfo.avgN=40;               % max number of cells used to distribute the runoff for one "river"
-myRunoffInfo.avgN=300;               % max number of cells used to distribute the runoff for one "river"
+%myRunoffInfo.avgN=40;               % max number of cells used to distribute the runoff for one "river"
+%myRunoffInfo.avgN=300;               % max number of cells used to distribute the runoff for one "river"
 myRunoffInfo.avgN=3000;               % max number of cells used to distribute the runoff for one "river"
 
 for nmon=1:numel(timeCounter)
@@ -163,6 +169,7 @@ for nmon=1:numel(timeCounter)
     % read original runoff -- this would be my large HYPE csv file?
     % and I think I want to read 1 time step at a time (so read each row)
     cRunoff=runoffMonthlyFile(nmon,:); % use nmon???? not sure about this. Data is m/s. cRunoff has runoff, lat and lon
+    cTemp=tempMonthlyFile(nmon,:);
 
     % what information do I need for this loop
    %*******
@@ -191,9 +198,10 @@ for nmon=1:numel(timeCounter)
 
 %%
    % cRunoff=cRunoff*KM3MonToMS;
-    [modelRunoff,myRunoffInfo]=computeModelRunoff(cRunoff,myRunoffInfo,modelInfo,nClosestPT);
-    modelRunoff(modelRunoff<0)=0;  % No negative runoff here
-    netcdf.putVar(ncfid,varIDList(5),[0 0 nmon-1],[NX NY 1],modelRunoff');
+    [modelRunoff,modelTemp,myRunoffInfo]=computeModelRunoff(cRunoff,cTemp,myRunoffInfo,modelInfo,nClosestPT);
+    modelRunoff(modelRunoff<0)=0;  % No negative runoff here, but can have negative temp?
+    modelTemp(modelTemp<0)=0;  % No negative temp
+    netcdf.putVar(ncfid,varIDList(5),[0 0 nmon-1],[NX NY 1],modelTemp');
     socoefr(modelRunoff>1e-7)=0.5; % where NEMO will do enhanced mixing because the existence of runoff
 end
 netcdf.putVar(ncfid,varIDList(4),socoefr');

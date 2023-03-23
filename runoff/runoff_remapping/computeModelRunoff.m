@@ -1,4 +1,4 @@
-function [tarRunoff,myRunoffInfo]=computeModelRunoff(oriRunoff,myRunoffInfo,modelInfo,nClosestPT)
+function [tarRunoff,tarTemp, myRunoffInfo]=computeModelRunoff(oriRunoff,oriTemp,myRunoffInfo,modelInfo,nClosestPT)
 %% interpolate the source runoff onto model grid
 %  usage:
 %       tarRunoff=computeModelRunoff(oriRunoff,myRunoffInfo,modelInfo)
@@ -24,6 +24,8 @@ function [tarRunoff,myRunoffInfo]=computeModelRunoff(oriRunoff,myRunoffInfo,mode
 %          labelRunoff, getRunoffArea, getCoastBufferModel, getRunoffIDW
 % history:
 %          2014-09: xianmin@ualberta.ca
+%          2022-11: pmyers@ualberta.ca
+%          2022-12: weissgib@ualberta.ca
 
 if nargin<3
    help computeModelRunoff
@@ -68,6 +70,7 @@ elseif isfield(modelInfo,'e1t') && isfield(modelInfo,'e2t')
 end
 
 tarRunoff=zeros(size(e1e2tInv));
+tarTemp=zeros(size(e1e2tInv));
 modelInfo.NX=size(tarRunoff,2);
 modelInfo.NY=size(tarRunoff,1);
 
@@ -97,8 +100,8 @@ for nr=1:numel(indRunoff)
           disp(['river #',num2str(nr),' is not in model domain within polygon #',num2str(isInsideDomain(nr))])
        else
           % convert runoff data to volume equivalent if necessary 
-          rnfVol=oriRunoff(indRunoff(nr))*1000;           % m^3/s * kg/m^3  ==> kg/s
-          
+          rnfVol=oriRunoff(indRunoff(nr))*1000;    % m^3/s * kg/m^3  ==> kg/s
+          rnfTemp=oriTemp(indRunoff(nr));
           % spread onto the closest water point in model
           if (rnfWGT.isComputed(nClosestPT(nr),nr)==0)
              [wgtC,distC,indexC]=computeWGT(myRunoffInfo,modelInfo,nr,nClosestPT(nr));
@@ -110,10 +113,13 @@ for nr=1:numel(indRunoff)
              wgtC=rnfWGT.rnf{nr}.WPT{nClosestPT(nr)}.wgt;
              indexC=rnfWGT.rnf{nr}.WPT{nClosestPT(nr)}.index;
           end
+
           if nClosestPT(nr)==1
              tarRunoff(indexC)=tarRunoff(indexC)+rnfVol*e1e2tInv(indexC);
+             tarTemp(indexC)=tarRunoff(indexC) + rnfTemp.*wgtC;  %don't want to divide by the area for temp
           else
              tarRunoff(indexC)=tarRunoff(indexC) + rnfVol.*wgtC.*e1e2tInv(indexC);
+             tarTemp(indexC) = tarRunoff(indexC)+rnfTemp.*wgtC;
           end
        end
     %else
@@ -184,10 +190,12 @@ function [wgt,dist,index]=computeWGT(myRunoffInfo,modelInfo,nr,avgN)
      dist(1,1:avgN)=[distSort(2) reshape(distSort(2:avgN),1,[])];
      
      if avgN<4
-        wgt(1,1:avgN)=1/avgN;
+        %wgt(1,1:avgN)=1/avgN;
+        wgt(1,1:avgN)=1;
      else
-        tmpwgt=cos(distSort(1:avgN)*pi*0.25/distSort(avgN));
-        wgt=reshape(tmpwgt/sum(tmpwgt),1,[]);
+        %tmpwgt=cos(distSort(1:avgN)*pi*0.25/distSort(avgN));
+        %wgt=reshape(tmpwgt/sum(tmpwgt),1,[]);
+        wgt=1;
     end
   end
 
