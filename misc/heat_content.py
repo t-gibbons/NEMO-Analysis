@@ -7,10 +7,10 @@ import netCDF4 as nc
 
 rho = 1025 #kg/m^3
 c_p = 3850 #K/(kgC)
-runid = 'EPM101'
+runid = 'ETW161'
 
 #paths
-path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
+path = "/project/6007519/weissgib/ANHA4/ANHA4-"+runid+"-S/"
 grid_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/ANHA4_mesh_mask.nc'
 output_path = '/project/6007519/weissgib/plotting/heat/'
 
@@ -19,8 +19,8 @@ mdl_files = glob.glob(path+'ANHA4-'+runid+'*_gridT.nc')
 
 #remove the last file from the list
 #for a lot of the model runs, the last file is blank so just going to remove it
-last_file = path+'ANHA4-'+runid+'_y2019m04d10_gridT.nc' #just set last file for now, want to fix this
-mdl_files.remove(last_file)
+#last_file = path+'ANHA4-'+runid+'_y2019m04d10_gridT.nc' #just set last file for now, want to fix this
+#mdl_files.remove(last_file)
 
 d = xr.open_mfdataset(mdl_files, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
 

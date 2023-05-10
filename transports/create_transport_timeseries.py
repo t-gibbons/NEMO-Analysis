@@ -8,16 +8,15 @@ import matplotlib.pyplot as plt
 
 #get list of all data files
 
-#root_dir = '/project/6000276/weissgib/transports/'
 root_dir = '/project/6007519/weissgib/plotting/figs/transports/'
-fig_path = '/project/6007519/weissgib/plotting/fwc_figs/'
+fig_path = '/project/6007519/weissgib/plotting/transports/'
 
-files = glob.glob(root_dir+'barrow_strait_freshwater_transport_*.nc')
+files = glob.glob(root_dir+'davis_strait_volume_transport_*.nc')
 
 #also plot observed values
 obs_davis = False 
 obs_nares = False
-obs_barrow = True
+obs_barrow = False
 
 experiment = []
 transport = []
@@ -31,27 +30,30 @@ for f in files:
     
     
     if exp == 'EPM101':
+        continue
         #exp = 'HYPE,CGRF'
         exp = 'No river water temp'
         continue
     if exp == 'EPM102':
         exp = 'HYPE,ERA'
         continue
-    if exp == 'EPM151':
-        exp = 'HYPE, CGRF'
-    if exp == 'EPM152':
-        exp = 'HYPE, ERA'
-    if exp == 'EPM014':
-        exp = 'Dai and Trenberth,ERA'
-    if exp == 'EPM015':
-        exp = 'Dai and Trenberth,CGRF'
-    if exp == 'ETW101':
-        continue
+    #if exp == 'EPM151':
+        #exp = 'No river water temp'
+    #if exp == 'EPM152':
+        #exp = 'HYPE, ERA'
+    #if exp == 'EPM014':
+        #continue
+        #exp = 'Dai and Trenberth,ERA'
+    #if exp == 'EPM015':
+        #continue
+        #exp = 'Dai and Trenberth,CGRF'
+    if exp == 'ETW161':
         exp = 'River water temp'
+        continue
     
     d = xr.open_dataset(f)
-    #v = (d['vel'].values)
-    v = d['__xarray_dataarray_variable__'].values
+    v = (d['vel'].values)
+    #v = d['__xarray_dataarray_variable__'].values
     datetimeindex = d.indexes['time_counter'].to_datetimeindex()
     times = datetimeindex.values
     l = d.dims['time_counter']
@@ -147,12 +149,16 @@ all_data = {'experiment': experiment, 'volume_transport': transport, 'date': dat
 df = pd.DataFrame(all_data)
 print(df)
 
+#df['diff'] = df['River water temp']-df['No river water temp']
+
 mean = df.groupby('experiment', as_index=False)['volume_transport'].mean()
 print(mean)
 
 #now lets make the time series for each region
 rd = df.pivot(index='date', columns='experiment', values='volume_transport')
 avg = rd.resample('M').mean() #take the monthly mean
+#avg['diff'] = avg['River water temp']-avg['No river water temp']
+print(avg)
 
 #just output the annual average
 annual_avg = rd.resample('Y').mean()
@@ -162,9 +168,9 @@ print(annual_avg)
 #rd["2009-01-03":"2010'12'31"].plot()
 avg.plot()
 plt.grid(True)
-plt.title('Barrow Strait')
-plt.ylabel('freshwater transport')
+plt.title('Davis Strait')
+plt.ylabel('volume transport')
 
 #plt.show()
-plt.savefig(fig_path+'time_series_freshwater_transport_barrow_strait.png')
+plt.savefig(fig_path+'time_series_volume_transport_davis_strait.png')
 plt.clf()

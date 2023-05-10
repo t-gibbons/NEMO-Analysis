@@ -44,7 +44,7 @@ def section_calculation(x1, x2, y1, y2):
 
     return ii, jj
 
-def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, startmonth=1, startday=5):
+def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, startmonth=1, startday=5):
     figs_path = '/project/6007519/weissgib/plotting/figs/transports/'
     path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
     other_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/'
@@ -121,8 +121,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     #section = 'bering_strait'
     #ii,jj = section_calculation(222, 237, 783, 791)
 
-    #section = 'nares_strait'
-    #ii, jj = section_calculation(197,214,537,522)
+    section = 'nares_strait'
+    ii, jj = section_calculation(197,214,537,522)
 
     #section = 'labrador_current_2'
     #ii, jj = section_calculation(174, 199, 330, 308)
@@ -130,8 +130,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     #section = 'siberian_shelf'
     #ii, jj = section_calculation(335,391,687,671)
 
-    section = 'barrow_strait'
-    ii, jj = section_calculation(156,164,550,550)
+    #section = 'barrow_strait'
+    #ii, jj = section_calculation(156,164,550,550)
 
     t = du.dims['time_counter']
     total_volume = []
@@ -260,10 +260,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     dv.close()
     du.close()
 
-
-			
 if __name__ == "__main__":
-    transport_calculations(runid='EPM151', endyear=2020, endmonth=12, endday=31)
+    transport_calculations(runid='EPM151', endyear=2018, endmonth=12, endday=31)
     transport_calculations(runid='EPM152', endyear=2018, endmonth=12, endday=31)
-    #transport_calculations(runid='EPM014', endyear=2019, endmonth=8, endday=23)
-    #transport_calculations(runid='EPM015', endyear=2019, endmonth=12, endday=31)
+    transport_calculations(runid='EPM014', endyear=2019, endmonth=8, endday=23)
+    transport_calculations(runid='EPM015', endyear=2019, endmonth=12, endday=31)

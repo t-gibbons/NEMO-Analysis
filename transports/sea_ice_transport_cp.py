@@ -47,10 +47,9 @@ def section_calculation(x1, x2, y1, y2):
 
     return ii, jj
 
-def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, startmonth=1, startday=5):
+def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, startmonth=1, startday=5):
     figs_path = '/project/6007519/weissgib/plotting/transports/'
-    path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
-    #path = "/project/6007519/weissgib/ANHA4/ANHA4-"+runid+"-S/"
+    path = "/project/6007519/weissgib/ANHA4/ANHA4-"+runid+"-S/"
     other_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/'
 
     start_time = datetime.date(startyear, startmonth, startday)
@@ -60,7 +59,6 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     #figure out all the dates we have model files
     delta = end_time - start_time
     times = []
-    
     i = 0
     while i < delta.days+1:
         t = start_time + datetime.timedelta(days=i)
@@ -74,10 +72,9 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     mdl_files_ice = []
     for t in times:
         mdl_files_ice.append(path+"ANHA4-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
-    
-    #path = "/project/6000276/weissgib/ANHA4/ANHA4-"+runid+"-S/"
 
     #mdl_files_ice = glob.glob(path+'ANHA4-'+runid+'_icemod_*.nc')
+    print(mdl_files_ice)
     di = xr.open_mfdataset(mdl_files_ice, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
 
     #read in the mask file
@@ -177,4 +174,4 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     di.close()
 			
 if __name__ == "__main__":
-    transport_calculations(runid='EPM151', endyear=2019, endmonth=4, endday=5)
+    transport_calculations(runid='ETW161', endyear=2018, endmonth=12, endday=31)
