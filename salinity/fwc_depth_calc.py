@@ -42,7 +42,7 @@ def fwc_depth_calc(runid, endyear, endmonth, endday, startyear=2002, startmonth=
     d = xr.open_mfdataset(mdl_files, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
 
     #also want to read in the mesh grid info
-    grid_file = '/project/6007519/weissgib/plotting/ANHA4_mesh_mask.nc'
+    grid_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/ANHA4_mesh_mask.nc'
     mesh = nc.Dataset(grid_file)
 
     mask = np.array(mesh.variables['tmask'])
@@ -97,7 +97,7 @@ def fwc_depth_calc(runid, endyear, endmonth, endday, startyear=2002, startmonth=
     fwc.to_netcdf(output_path+runid+'_monthly_avg_fwc_200m.nc')
 
 if __name__ == "__main__":
-    fwc_depth_calc(runid='EPM101', endyear=2019, endmonth=4, endday=5)
-    fwc_depth_calc(runid='EPM102', endyear=2019, endmonth=6, endday=9)
-    fwc_depth_calc(runid='EPM014', endyear=2019, endmonth=8, endday=23)
-    fwc_depth_calc(runid='EPM015', endyear=2019, endmonth=12, endday=31)
+    fwc_depth_calc(runid='EPM151', endyear=2019, endmonth=12, endday=31)
+    fwc_depth_calc(runid='EPM152', endyear=2019, endmonth=8, endday=23)
+    #fwc_depth_calc(runid='EPM014', endyear=2019, endmonth=8, endday=23)
+    #fwc_depth_calc(runid='EPM015', endyear=2019, endmonth=12, endday=31)

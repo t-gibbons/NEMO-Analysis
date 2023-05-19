@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 root_dir = '/project/6007519/weissgib/plotting/figs/transports/'
 fig_path = '/project/6007519/weissgib/plotting/transports/'
 
-files = glob.glob(root_dir+'davis_strait_volume_transport_*.nc')
+files = glob.glob(root_dir+'fram_strait_freshwater_transport_*.nc')
 
 #also plot observed values
 obs_davis = False 
@@ -39,10 +39,11 @@ for f in files:
         continue
     #if exp == 'EPM151':
         #exp = 'No river water temp'
-    #if exp == 'EPM152':
+    if exp == 'EPM152':
+        continue
         #exp = 'HYPE, ERA'
-    #if exp == 'EPM014':
-        #continue
+    if exp == 'EPM014':
+        continue
         #exp = 'Dai and Trenberth,ERA'
     #if exp == 'EPM015':
         #continue
@@ -52,8 +53,8 @@ for f in files:
         continue
     
     d = xr.open_dataset(f)
-    v = (d['vel'].values)
-    #v = d['__xarray_dataarray_variable__'].values
+    #v = (d['vel'].values)
+    v = d['__xarray_dataarray_variable__'].values
     datetimeindex = d.indexes['time_counter'].to_datetimeindex()
     times = datetimeindex.values
     l = d.dims['time_counter']
@@ -157,7 +158,7 @@ print(mean)
 #now lets make the time series for each region
 rd = df.pivot(index='date', columns='experiment', values='volume_transport')
 avg = rd.resample('M').mean() #take the monthly mean
-#avg['diff'] = avg['River water temp']-avg['No river water temp']
+avg['diff'] = abs(avg['EPM151'])-abs(avg['EPM015'])
 print(avg)
 
 #just output the annual average
@@ -166,11 +167,11 @@ print(annual_avg)
 
 #rd.plot()
 #rd["2009-01-03":"2010'12'31"].plot()
-avg.plot()
+avg['diff'].plot()
 plt.grid(True)
-plt.title('Davis Strait')
-plt.ylabel('volume transport')
+plt.title('Fram Strait')
+plt.ylabel('freshwater transport')
 
 #plt.show()
-plt.savefig(fig_path+'time_series_volume_transport_davis_strait.png')
+plt.savefig(fig_path+'time_series_freshwater_transport_fram_strait_diff_CGRF.png')
 plt.clf()

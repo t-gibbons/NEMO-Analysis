@@ -24,16 +24,17 @@ for y in range(start_year, end_year+1):
 new_runoff = xr.concat(data, dim='time_counter')
 
 #old runoff
-old_path = '/project/6007519/pmyers/ANHA4-I/RUNOFF/Bamber2012/'
+old_path = '/project/6007519/ANHA4-I/RUNOFF/Bamber2012/'
 files = []
 
 for y in range(start_year, end_year+1):
     files.append(old_path+'ANHA4_runoff_monthly_combined_Dai_Trenberth_Bamber_y'+str(y)+'.nc')
 
 old_runoff = xr.open_mfdataset(files)
+print(old_runoff)
 
 #model grid information for converting units
-grid_file = '/project/6007519/weissgib/plotting/ANHA4_mesh_mask.nc'
+grid_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/ANHA4_mesh_mask.nc'
 mesh = xr.open_mfdataset(grid_file)
 
 e1v = mesh['e1v']
@@ -41,13 +42,14 @@ e2u = mesh['e2u']
 print(e1v)
 
 #and the mask files for getting coastal regions
-mask_path = '/project/6007519/weissgib/plotting/runoff_regions_mask.nc'
-#mask_path = '/project/6007519/weissgib/plotting/regions_mask.nc'
+#mask_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_temp_regions_mask_all_mask.nc'
+mask_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_hudson_bay_regions.nc'
 
 mask_data = xr.open_mfdataset(mask_path)
 
-#masks = {'ss_mask': 'Siberian Shelf', 'cs_mask': 'Canadian Shelf'}
-masks = {'hb_mask': 'Hudson Bay and Greenland', 'caa_mask': 'Canadian Arctic Archipelago', 'bs_mask': 'Bering Strait', 'ec_mask': 'Eastern Coast', 'nc_mask': 'Norway and British Isles'}
+masks = {'bay_mask': 'Ungava Bay'}
+#masks = {'hb_mask': 'Hudson Bay and Greenland', 'caa_mask': 'Canadian Arctic Archipelago', 'bs_mask': 'Bering Strait', 'ec_mask': 'Eastern Coast', 'nc_mask': 'Norway and British Isles'}
+#masks = {'high_arctic': 'High Arctic', 'full_arctic': 'Full Arctic'}
 
 #lets make some time series over these regions
 for m in masks:
@@ -70,27 +72,38 @@ for m in masks:
     print('Dai annual average mean '+masks[m]+' : '+str(dai_mean))
     print('HYPE annual average mean '+masks[m]+' : '+str(hype_mean))
 
+    new_timeseries = new_timeseries.groupby('time_counter.year').mean('time_counter')
+    old_timeseries = old_timeseries.groupby('time_counter.year').mean('time_counter')
+
     nt = new_timeseries.values
     ot = old_timeseries.values
 
     #lets just repeat the last year of dai to match hype
-    last_year = ot[-12:]
-    for i in range(0,12): ot = np.concatenate((ot, last_year))
+    #last_year = ot[-12:]
+    #for i in range(0,12): ot = np.concatenate((ot, last_year))
 
-    dn = new_timeseries['time_counter'].values
+    dn = new_timeseries['year'].values
+    do = old_timeseries['year'].values
     n = len(dn)
+    p = len(do)
     ot1 = np.empty(n)
     ot1[:] = np.nan
-    for i in range(len(ot)):
-        ot1[i] = ot[i]
+    last_year = ot[-1]
+    for i in range(len(dn)):
+        if i < p: 
+            ot1[i] = ot[i]
+        else: 
+            ot1[i] = last_year
+        #ot1[i] = ot[i]
     
     plt.plot(dn, nt, label='HYPE')
     plt.plot(dn, ot1, label='Dai and Trenberth')
     plt.legend()
     plt.title(masks[m])
     plt.ylabel('runoff (m^3/s)')
+    plt.tight_layout()
     #plt.show()
-    plt.savefig('/project/6007519/weissgib/plotting/figs/runoff/'+m+'_runoff_comp_new.png')
+    plt.savefig('/project/6007519/weissgib/plotting/figs/runoff/'+m+'_runoff_comp_annual.png')
     plt.clf()
 
 exit()

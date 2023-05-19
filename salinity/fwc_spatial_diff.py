@@ -40,8 +40,8 @@ for atmo in runids:
     hype_data = xr.open_dataset(hype)
 
     #take an overall average
-    dai_mean = dai_data.mean('time_counter')
-    hype_mean = hype_data.mean('time_counter')
+    dai_mean = dai_data.mean('time_counter.year')
+    hype_mean = hype_data.mean('time_counter.year')
 
     dd = dai_mean['vosaline'].values
     hd = hype_mean['vosaline'].values
