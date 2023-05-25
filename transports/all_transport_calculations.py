@@ -121,8 +121,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     #section = 'bering_strait'
     #ii,jj = section_calculation(222, 237, 783, 791)
 
-    section = 'nares_strait'
-    ii, jj = section_calculation(197,214,537,522)
+    #section = 'nares_strait'
+    #ii, jj = section_calculation(197,214,537,522)
 
     #section = 'labrador_current_2'
     #ii, jj = section_calculation(174, 199, 330, 308)
@@ -132,6 +132,9 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
 
     #section = 'barrow_strait'
     #ii, jj = section_calculation(156,164,550,550)
+
+    section = 'fram_south'
+    ii, jj = section_calculation(327,336,508,510)
 
     t = du.dims['time_counter']
     total_volume = []
