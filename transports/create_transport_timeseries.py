@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 root_dir = '/project/6007519/weissgib/plotting/figs/transports/'
 fig_path = '/project/6007519/weissgib/plotting/transports/'
 
-files = glob.glob(root_dir+'fram_strait_freshwater_transport_*.nc')
+files = glob.glob(root_dir+'davis_strait_freshwater_transport_*.nc')
 
 #also plot observed values
-obs_davis = False 
+obs_davis = True
 obs_nares = False
 obs_barrow = False
 
@@ -37,17 +37,18 @@ for f in files:
     if exp == 'EPM102':
         exp = 'HYPE,ERA'
         continue
-    #if exp == 'EPM151':
+    if exp == 'EPM151':
         #exp = 'No river water temp'
+        exp = 'A-HYPE'
     if exp == 'EPM152':
         continue
         #exp = 'HYPE, ERA'
     if exp == 'EPM014':
         continue
         #exp = 'Dai and Trenberth,ERA'
-    #if exp == 'EPM015':
+    if exp == 'EPM015':
         #continue
-        #exp = 'Dai and Trenberth,CGRF'
+        exp = 'Dai and Trenberth'
     if exp == 'ETW161':
         exp = 'River water temp'
         continue
@@ -80,7 +81,7 @@ if obs_davis:
     transport.extend(list(fw_transport))
     date.extend(list(timestamps))
     for i in range(len(fw_transport)):
-        experiment.append('obs')
+        experiment.append('Observations')
 
 if obs_nares:
     
@@ -158,8 +159,17 @@ print(mean)
 #now lets make the time series for each region
 rd = df.pivot(index='date', columns='experiment', values='volume_transport')
 avg = rd.resample('M').mean() #take the monthly mean
-avg['diff'] = abs(avg['EPM151'])-abs(avg['EPM015'])
+#avg = avg.loc["2008-01-01":"2018-12-31"]
 print(avg)
+avg['diff'] = ((abs(avg['A-HYPE'])-abs(avg['Dai and Trenberth']))/abs(avg['Dai and Trenberth']))*100
+mean = avg['diff'].mean()
+print(mean)
+#mean15 = avg['Dai and Trenberth'].mean()
+#mean151 = avg['A-HYPE'].mean()
+#meanobs = avg['Observations'].mean()
+#print(mean15)
+#print(mean151)
+#print(meanobs)
 
 #just output the annual average
 annual_avg = rd.resample('Y').mean()
@@ -168,10 +178,17 @@ print(annual_avg)
 #rd.plot()
 #rd["2009-01-03":"2010'12'31"].plot()
 avg['diff'].plot()
+plt.axhline(y=mean, color='C0', linestyle='--')
+#avg.plot()
+#plt.axhline(y=mean151, color='C0', linestyle='--')
+#plt.axhline(y=mean15, color='C1', linestyle='--')
+#plt.axhline(y=meanobs, color='C2', linestyle='--')
+ax = plt.gca()
+ax.set_ylim([-30, 30])
 plt.grid(True)
-plt.title('Fram Strait')
-plt.ylabel('freshwater transport')
+plt.title('Davis Strait')
+plt.ylabel('percentage change freshwater transport')
 
 #plt.show()
-plt.savefig(fig_path+'time_series_freshwater_transport_fram_strait_diff_CGRF.png')
+plt.savefig(fig_path+'time_series_freshwater_transport_davis_strait_CGRF_change.png')
 plt.clf()

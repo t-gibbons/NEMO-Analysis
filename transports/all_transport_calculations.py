@@ -115,8 +115,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     #section = 'fram_strait'
     #ii, jj = section_calculation(304, 360, 503, 526)
 
-    #section = 'davis_strait'
-    #ii, jj = section_calculation(175,214,443,443)
+    section = 'davis_strait_south'
+    ii, jj = section_calculation(175,214,443,443)
 
     #section = 'bering_strait'
     #ii,jj = section_calculation(222, 237, 783, 791)
@@ -133,8 +133,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     #section = 'barrow_strait'
     #ii, jj = section_calculation(156,164,550,550)
 
-    section = 'fram_south'
-    ii, jj = section_calculation(327,336,508,510)
+    #section = 'fram_south'
+    #ii, jj = section_calculation(327,336,508,510)
 
     t = du.dims['time_counter']
     total_volume = []
@@ -161,6 +161,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
         negative=False
         if nav_lat[j1,i1] > nav_lat[j2,i2]: negative = True #south
         if nav_lon[j1,i1] > nav_lon[j2,i2]: negative = True #west
+
+        #if negative == False: continue #just want the southward component for davis strait
 
         #so we should only either have i change or j change
         if j1 == j2:
@@ -213,11 +215,13 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
         fwc = (34.8-sal)/34.8
 
         if negative:
+            print('negative!')
             vol = -v*cell_thickness*cell_width
             fw = -v*fwc*cell_thickness*cell_width
             heat = -v*temp*cell_thickness*cell_width
             salt = -v*sal*cell_thickness*cell_width
         else:
+            continue
             vol = v*cell_thickness*cell_width
             fw = v*fwc*cell_thickness*cell_width
             heat = v*temp*cell_thickness*cell_width
