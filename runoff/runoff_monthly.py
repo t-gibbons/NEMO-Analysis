@@ -5,11 +5,12 @@ import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 import cartopy.crs as ccrs
 import cartopy.feature as feature
+from matplotlib.ticker import MaxNLocator
 
 #new runoff
 path = '/project/6007519/ANHA4-I/RUNOFF/HydroGFD/'
 
-start_year = 2002
+start_year = 2008
 end_year = 2019
 data = []
 
@@ -22,6 +23,7 @@ for y in range(start_year, end_year+1):
     data.append(ds)
 
 new_runoff = xr.concat(data, dim='time_counter')
+print(new_runoff)
 
 #old runoff
 old_path = '/project/6007519/ANHA4-I/RUNOFF/Bamber2012/'
@@ -30,7 +32,7 @@ files = []
 for y in range(start_year, end_year+1):
     files.append(old_path+'ANHA4_runoff_monthly_combined_Dai_Trenberth_Bamber_y'+str(y)+'.nc')
 
-old_runoff = xr.open_mfdataset(files)
+old_runoff = xr.open_mfdataset(files, concat_dim='time_counter', combine='nested')
 print(old_runoff)
 
 #model grid information for converting units
@@ -43,13 +45,13 @@ print(e1v)
 
 #and the mask files for getting coastal regions
 #mask_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_temp_regions_mask_all_mask.nc'
-mask_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_hudson_bay_regions.nc'
+mask_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_comp_regions.nc'
 
 mask_data = xr.open_mfdataset(mask_path)
 
-masks = {'bay_mask': 'Ungava Bay'}
-#masks = {'hb_mask': 'Hudson Bay and Greenland', 'caa_mask': 'Canadian Arctic Archipelago', 'bs_mask': 'Bering Strait', 'ec_mask': 'Eastern Coast', 'nc_mask': 'Norway and British Isles'}
-#masks = {'high_arctic': 'High Arctic', 'full_arctic': 'Full Arctic'}
+#masks = {'bay_mask': 'Ungava Bay'}
+#masks = {'hb_mask': 'Hudson Bay', 'caa_mask': 'Canadian Arctic Archipelago', 'bs_mask': 'Mackenzie Region', 'bs_east_mask': 'Eastern Bering Strait', 'nc_mask': 'North Coast', 'kara_mask': 'Kara Seas', 'laptev_mask': 'Laptev Sea'}
+masks = {'high_arctic': 'Arctic'} #'full_arctic': 'Full Arctic'}
 
 #lets make some time series over these regions
 for m in masks:
@@ -71,6 +73,7 @@ for m in masks:
     hype_mean = np.mean(new_timeseries.groupby('time_counter.year').mean().values)
     print('Dai annual average mean '+masks[m]+' : '+str(dai_mean))
     print('HYPE annual average mean '+masks[m]+' : '+str(hype_mean))
+    exit()
 
     new_timeseries = new_timeseries.groupby('time_counter.year').mean('time_counter')
     old_timeseries = old_timeseries.groupby('time_counter.year').mean('time_counter')
@@ -95,13 +98,15 @@ for m in masks:
         else: 
             ot1[i] = last_year
         #ot1[i] = ot[i]
-    
-    plt.plot(dn, nt, label='HYPE')
-    plt.plot(dn, ot1, label='Dai and Trenberth')
+   
+    ax = plt.figure().gca()
+    ax.plot(dn, nt, label='A-HYPE')
+    ax.plot(dn, ot1, label='Dai and Trenberth')
     plt.legend()
-    plt.title(masks[m])
-    plt.ylabel('runoff (m^3/s)')
+    #plt.title(masks[m])
+    plt.ylabel('runoff ($\mathregular{m^3/s}$)')
     plt.tight_layout()
+    ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     #plt.show()
     plt.savefig('/project/6007519/weissgib/plotting/figs/runoff/'+m+'_runoff_comp_annual.png')
     plt.clf()
