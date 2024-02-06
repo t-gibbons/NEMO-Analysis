@@ -22,15 +22,18 @@ matplotlib.use('Agg')
 
 #define variables used for all functions
 
-long_names = {'EPM101': 'Old HYPE, CGRF', 'EPM102': 'Old HYPE, ERA', 'EPM151': 'HYPE, CGRF', 'EPM152': 'HYPE, ERA','EPM014': 'Dai and Trenberth, ERA', 'EPM015': 'Dai and Trenberth, CGRF'}
+long_names = {'EPM101': 'Old HYPE, CGRF', 'EPM102': 'Old HYPE, ERA', 'EPM151': 'A-HYPE', 'EPM152': 'HYPE, ERA','EPM014': 'Dai and Trenberth, ERA', 'EPM015': 'Dai and Trenberth'}
 
-path = '/project/6007519/weissgib/plotting/data_files/freshwater_content/'
+#path = '/project/6007519/weissgib/plotting/data_files/freshwater_content/'
+path = '/project/6007519/weissgib/plotting/batch_job_scripts/'
 fig_path = '/project/6007519/weissgib/plotting/fwc_figs/'
 #mask_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_temp_regions_mask.nc'
-mask_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/regions_mask.nc'
+mask_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_comp_regions.nc'
 
-#regions = {'bs_mask': 'Mackenzie Region', 'kara_mask': 'Kara Sea', 'laptev_mask': 'Laptev Sea', 'bs_east_mask': 'Eastern Bering Strait'}
-regions = {'caa_mask': 'Canadian Arctic Archipelago', 'ca_mask': 'Central Arctic', 'cs_mask': 'Canadian Shelf', 'cb_mask': 'Canadian Basin', 'eb_mask': 'Eurasian Basin', 'ss_mask': 'Siberian Shelf', 'ds_mask': 'Davis Strait', 'hb_mask': 'Hudson Bay', 'bs_mask': 'Bering Strait', 'ls_mask': 'Labrador Sea', 'ns_mask': 'Nares Strait', 'fs_mask': 'Fram Strait', 'lc_mask': 'Labrador Current'}
+#regions = {'hb_mask': 'Hudson Bay', 'bs_mask': 'Mackenzie River Region', 'bs_east_mask': 'Eastern Bering Strait', 'laptev_mask': 'Laptev Sea', 'caa_mask': 'Canadian Arctic Archipelago','kara_mask': 'Kara Sea'}
+
+#regions = {'caa_mask': 'Canadian Arctic Archipelago', 'ca_mask': 'Central Arctic', 'cs_mask': 'Canadian Shelf', 'cb_mask': 'Canadian Basin', 'eb_mask': 'Eurasian Basin', 'ss_mask': 'Siberian Shelf', 'ds_mask': 'Davis Strait', 'hb_mask': 'Hudson Bay', 'bs_mask': 'Bering Strait', 'ls_mask': 'Labrador Sea', 'ns_mask': 'Nares Strait', 'fs_mask': 'Fram Strait', 'lc_mask': 'Labrador Current'}
+regions = {'full_arctic': 'Total Arctic'}
 
 def read_mask(runids, long_name):
 
@@ -42,7 +45,7 @@ def read_mask(runids, long_name):
     date = []
 
     for exp in runids:
-        fwc_file = path+exp+'_fwc_34.8_isohaline_0m.nc'
+        fwc_file = path+exp+'_surface_salinity.nc'
     
         df = xr.open_mfdataset(fwc_file)
     
@@ -60,7 +63,7 @@ def read_mask(runids, long_name):
             #get the mask into the correct shape
             rmask = np.broadcast_to(rmask,(t,)+rmask.shape)
 
-            masked_fwc = ma.masked_where(rmask==1,fwc_data)
+            masked_fwc = ma.masked_where(rmask!=2,fwc_data)
             regional_fwc_ts = masked_fwc.mean(axis=(1,2))
             print(regional_fwc_ts.shape)
         
@@ -88,9 +91,16 @@ def fwc_region_comp(runids, long_name=False):
 
     #now we can do comparison timeseries plots
     for r in regions:
+        print(r)
         rd = df.loc[df['region'] == r]
         rd = rd.pivot(index='date', columns='experiment', values='fwc')
-        rd.plot()
+        rd["2002-01-03":"2019'12'31"].plot()
+        #rd.plot()
+        mean151 = rd[long_names[runids[0]]].mean()
+        mean15 = rd[long_names[runids[1]]].mean()
+        print(mean151)
+        print(mean15)
+        continue
         plt.grid(True)
         plt.title(regions[r]+' Freshwater Content')
         plt.ylabel('freshwater content (m)')
@@ -123,5 +133,5 @@ def fwc_region_diff(runids, long_name=False):
 
 
 if __name__ == "__main__":
-
-    fwc_region_diff(runids = ['EPM151', 'EPM015'])
+    fwc_region_comp(runids = ['EPM151', 'EPM015'], long_name=True)
+    #fwc_region_diff(runids = ['EPM151', 'EPM015'])

@@ -18,7 +18,7 @@ import cartopy.feature as feature
 #matplotlib.use('Agg')
 ###----------------------------------###
 
-def heat_cont_diff(endyear, endmonth, endday, startyear=2004, startmonth=1, startday=5):
+def heat_cont_diff(endyear, endmonth, endday, temp_id, notemp_id, startyear=2004, startmonth=1, startday=5):
 
     figs_path = '/project/6007519/weissgib/plotting/heat/'
 
@@ -33,29 +33,41 @@ def heat_cont_diff(endyear, endmonth, endday, startyear=2004, startmonth=1, star
     #read temp and no temp run
     path = "/project/6007519/weissgib/plotting/heat/"
 
-    print('trying to read files')
-    d_temp = xr.open_mfdataset(mdl_files_temp, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
-    d_no_temp = xr.open_mfdataset(mdl_files_notemp, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
+    mdl_files_temp = figs_path+temp_id+'_heat_content.nc'
+    mdl_files_notemp= figs_path+notemp_id+'_heat_content.nc'
 
-    print('taking the mean')
-    no_temp_avg = d_no_temp['iicethic'].resample(time_counter='Q-NOV').mean()
-    temp_avg = d_temp['iicethic'].resample(time_counter='Q-NOV').mean()
+    print('trying to read files')
+    d_temp = xr.open_mfdataset(mdl_files_temp)
+    d_no_temp = xr.open_mfdataset(mdl_files_notemp)
+
+    #no_temp_avg = d_no_temp['votemper'].resample(time_counter='Q-NOV').mean()
+    #temp_avg = d_temp['votemper'].resample(time_counter='Q-NOV').mean()
+
+    no_temp_avg = d_no_temp.groupby('time_counter.year').mean('time_counter')
+    temp_avg = d_temp.groupby('time_counter.year').mean('time_counter')
 
     print(temp_avg)
     print(no_temp_avg)
 
-    times = temp_avg['time_counter'].values
+    times = temp_avg['year'].values
 
-    for t in times:
-        st = t.strftime('%Y-%m-%d')
-        print(st)
-        if t.month == 2: season = 'DJF'
-        if t.month == 5: season = 'MAM'
-        if t.month == 8: season = 'JJA'
-        if t.month == 11: season = 'SON'
+    #for t in times:
+    for y in range(temp_avg.dims['year']):
 
-        d1 = temp_avg.sel(time_counter=st).values
-        d2 = no_temp_avg.sel(time_counter=st).values
+        #st = t.strftime('%Y-%m-%d')
+        #print(st)
+        t = times[y]
+        print(t)
+        #if t.month == 2: season = 'DJF'
+        #if t.month == 5: season = 'MAM'
+        #if t.month == 8: season = 'JJA'
+        #if t.month == 11: season = 'SON'
+
+        #d1 = temp_avg.sel(time_counter=st).values
+        #d2 = no_temp_avg.sel(time_counter=st).values
+        d1 = temp_avg.isel(year=y).values
+        d2 = no_temp_avg.isel(year=y).values
+        print(d1)
         diff = ((d2-d1)/d1)*100
         diff = diff[0,:,:]
 
@@ -97,9 +109,10 @@ def heat_cont_diff(endyear, endmonth, endday, startyear=2004, startmonth=1, star
         p1 = ax.pcolormesh(lons, lats, diff, transform=ccrs.PlateCarree(), cmap='bwr', vmin=-15, vmax=15)
         ax_cb = plt.axes([0.92, 0.25, 0.015, 0.5])
         cb = plt.colorbar(p1, cax=ax_cb, orientation='vertical')
-        cb.ax.set_ylabel('Sea Ice Thickness (m)')
+        cb.ax.set_ylabel('Percentage Difference in Heat Content')
         ax.gridlines()
-        plt.savefig(figs_path+'sea_ice_thickness_diff_rel_'+season+'_'+st+'.png')
+        #plt.savefig(figs_path+'heat_cont_diff_'+temp_id+'_'+notemp_id+'_'+season+'_'+st+'.png')
+        plt.savefig(figs_path+'heat_cont_diff_'+temp_id+'_'+notemp_id+'_'+str(t)+'.png')
         #plt.show()
         plt.clf()
 
@@ -108,4 +121,4 @@ def heat_cont_diff(endyear, endmonth, endday, startyear=2004, startmonth=1, star
 
 
 if __name__ == "__main__":
-    sea_ice_thickness_diff(2017, 12 ,31)
+    heat_cont_diff(2017, 12 ,31, temp_id='ETW161', notemp_id='EPM151')

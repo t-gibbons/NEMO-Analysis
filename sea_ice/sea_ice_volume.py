@@ -10,7 +10,8 @@ import netCDF4 as nc
 
 def sea_ice_volume(runid, endyear, endmonth, endday, startyear=2002, startmonth=1, startday=5):
     figs_path = '/project/6007519/weissgib/plotting/sea_ice/'
-    path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
+    path = "/project/6007519/weissgib/ANHA4/ANHA4-"+runid+"-S/"
+    #path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
 
     start_time = datetime.date(startyear, startmonth, startday)
 
@@ -74,7 +75,7 @@ def sea_ice_volume(runid, endyear, endmonth, endday, startyear=2002, startmonth=
     d.close()
 
 if __name__ == "__main__":
-    sea_ice_volume(runid='EPM151', endyear=2019, endmonth=4, endday=5)
+    sea_ice_volume(runid='EPM161', endyear=2018, endmonth=12, endday=31)
     #sea_ice_volume(runid='EPM102', endyear=2019, endmonth=6, endday=9)
     #sea_ice_volume(runid='EPM014', endyear=2019, endmonth=8, endday=23)
     #sea_ice_volume(runid='EPM015', endyear=2019, endmonth=12, endday=31)

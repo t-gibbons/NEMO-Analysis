@@ -15,8 +15,8 @@ import cartopy.crs as ccrs
 import cartopy.feature as feature
 
 ###this is for running script backend###
-#import matplotlib
-#matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
 ###----------------------------------###
 
 def sea_ice_thickness_spatial(runid, endyear, endmonth, endday, startyear=2002, startmonth=1, startday=5):
@@ -74,7 +74,7 @@ def sea_ice_thickness_spatial(runid, endyear, endmonth, endday, startyear=2002, 
 
     d.close()
 
-def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2004, startmonth=1, startday=5):
+def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2004, startmonth=1, startday=5, lim3=False):
 
     figs_path = '/project/6007519/weissgib/plotting/sea_ice/'
 
@@ -87,9 +87,10 @@ def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2004, startmonth
     mesh.close()
 
     #read temp and no temp run
-    path_temp = "/project/6007519/weissgib/ANHA4/ANHA4-ETW161-S/"
+    path_temp = "/project/6007519/weissgib/ANHA4/ANHA4-ETW162-S/"
 
-    path = "/project/6007519/pmyers/ANHA4/ANHA4-EPM151-S/"
+    #path = "/project/6007519/pmyers/ANHA4/ANHA4-EPM151-S/"
+    path = "/project/6007519/weissgib/ANHA4/ANHA4-EPM161-S/"
     start_time = datetime.date(startyear, startmonth, startday)
 
     end_time = datetime.date(endyear, endmonth, endday)
@@ -109,24 +110,37 @@ def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2004, startmonth
             i = i+5
         times.append(t)
 
-    print(times)
     #and now make a list of model files to read
     mdl_files_temp = []
     mdl_files_notemp = []
     for t in times:
-        mdl_files_temp.append(path_temp+"ANHA4-ETW161_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
-        mdl_files_notemp.append(path+"ANHA4-EPM151_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
+        mdl_files_temp.append(path_temp+"ANHA4-ETW162_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
+        mdl_files_notemp.append(path+"ANHA4-EPM161_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
 
-    print('trying to read files')
+    print('trying to read temp files')
     d_temp = xr.open_mfdataset(mdl_files_temp, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
+    
+    print('trying to read no temp files')
     d_no_temp = xr.open_mfdataset(mdl_files_notemp, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
 
-    print('taking the mean')
-    no_temp_avg = d_no_temp['iicethic'].resample(time_counter='Q-NOV').mean()
-    temp_avg = d_temp['iicethic'].resample(time_counter='Q-NOV').mean()
+    if lim3:
+        
+        #for lim3 have to calculate the thickness in each category
+        no_temp_avg = d_no_temp.resample(time_counter='Q-NOV').mean()
+        temp_avg = d_temp.resample(time_counter='Q-NOV').mean()
 
-    print(temp_avg)
-    print(no_temp_avg)
+        total_ice_notemp = no_temp_avg['iiceethick_cat']*no_temp_avg['ileadfra_cat']
+        total_ice_temp = temp_avg['iiceethick_cat']*temp_avg['ileadfra_cat']
+
+        #and sum over the categories
+        ice_thick_notemp = np.sum(total_ice_notemp, axis=1)
+        ice_thick_temp = np.sum(total_ice_temp, axis=1)
+
+    else:
+
+        ice_thick_notemp = d_no_temp['iicethic'].resample(time_counter='Q-NOV').mean()
+        ice_thick_temp = d_temp['iicethic'].resample(time_counter='Q-NOV').mean()
+
 
     times = temp_avg['time_counter'].values
 
@@ -138,9 +152,10 @@ def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2004, startmonth
         if t.month == 8: season = 'JJA'
         if t.month == 11: season = 'SON'
 
-        d1 = temp_avg.sel(time_counter=st).values
-        d2 = no_temp_avg.sel(time_counter=st).values
-        diff = ((d2-d1)/d1)*100
+        d1 = ice_thick_temp.sel(time_counter=st).values
+        d2 = ice_thick_notemp.sel(time_counter=st).values
+        diff = d1-d2
+        #diff = ((d1-d2)/d2)*100
         diff = diff[0,:,:]
 
         #north pole stero projection
@@ -178,12 +193,12 @@ def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2004, startmonth
         ax.coastlines(resolution='50m')
         """
 
-        p1 = ax.pcolormesh(lons, lats, diff, transform=ccrs.PlateCarree(), cmap='bwr', vmin=-15, vmax=15)
+        p1 = ax.pcolormesh(lons, lats, diff, transform=ccrs.PlateCarree(), cmap='bwr', vmin=-0.5, vmax=0.5)
         ax_cb = plt.axes([0.92, 0.25, 0.015, 0.5])
         cb = plt.colorbar(p1, cax=ax_cb, orientation='vertical')
         cb.ax.set_ylabel('Sea Ice Thickness (m)')
         ax.gridlines()
-        plt.savefig(figs_path+'sea_ice_thickness_diff_rel_'+season+'_'+st+'.png')
+        plt.savefig(figs_path+'sea_ice_thickness_diff_lim3_cat_'+season+'_'+st+'.png')
         #plt.show()
         plt.clf()
 
@@ -192,4 +207,4 @@ def sea_ice_thickness_diff(endyear, endmonth, endday, startyear=2004, startmonth
 
 
 if __name__ == "__main__":
-    sea_ice_thickness_diff(2017, 12 ,31)
+    sea_ice_thickness_diff(2018, 12 ,31, lim3=True)

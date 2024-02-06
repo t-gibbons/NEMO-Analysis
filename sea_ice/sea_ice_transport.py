@@ -47,9 +47,9 @@ def section_calculation(x1, x2, y1, y2):
 
     return ii, jj
 
-def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, startmonth=1, startday=5):
-    figs_path = '/project/6007519/weissgib/plotting/figs/transports/'
-    path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
+def transport_calculations(runid, endyear, endmonth, endday, lim3=False, startyear=2002, startmonth=1, startday=5):
+    figs_path = '/project/6007519/weissgib/plotting/transports/'
+    
     other_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/'
 
     start_time = datetime.date(startyear, startmonth, startday)
@@ -74,9 +74,9 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     for t in times:
         mdl_files_ice.append(path+"ANHA4-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
     """
-    path = "/project/6000276/weissgib/ANHA4/ANHA4-"+runid+"-S/"
+    path = "/project/6007519/weissgib/ANHA4/ANHA4-"+runid+"-S/"
 
-    mdl_files_ice = glob.glob(path+'ANHA4-'+runid+'_icemod_*.nc')
+    mdl_files_ice = glob.glob(path+'ANHA4-'+runid+'*_icemod.nc')
     di = xr.open_mfdataset(mdl_files_ice, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
 
     #read in the mask file
@@ -154,7 +154,18 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
             
             cell_width = np.ones(v.shape)*e2u[j1,i1]
 
-        ice_thick = di['iicethic'].isel(y=j1, x=i1)
+        #if lim3, get the ice thickness by finding the thickness in each category
+        if lim3:
+            t_ice = di['iiceethick_cat']*di['ileadfra_cat']
+
+            #and sum over the categories
+            ice_thick = np.sum(t_ice, axis=1)
+            ice_thick = ice_thick.isel(y=j1, x=i1)
+
+        else:
+
+            ice_thick = di['iicethic'].isel(y=j1, x=i1)
+
         ice_frac = di['ileadfra'].isel(y=j1, x=i1)
 
         if negative:
@@ -164,7 +175,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
 
         total_ice.append(vol)
 
-    #now sum the data at each location    
+    #now sum the data at each location
+    print(total_ice)
     ice_transport = total_ice[0]
 
     for t in range(1, len(total_ice)):
@@ -176,4 +188,4 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     di.close()
 			
 if __name__ == "__main__":
-    transport_calculations(runid='ETW101', endyear=2019, endmonth=4, endday=5)
+    transport_calculations(runid='EPM161', endyear=2018, endmonth=12, endday=31, lim3=True)
