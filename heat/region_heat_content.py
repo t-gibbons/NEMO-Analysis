@@ -2,20 +2,27 @@ import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
 
+###this is for running script backend###
+import matplotlib
+matplotlib.use('Agg')
+###----------------------------------###
+
+figs_path = '/project/6007519/weissgib/plotting/heat/'
+
 #old run
-path_old = '/mnt/storage6/tahya/model_files/EPM161_heat_content.nc'
+path_old = '/project/6007519/weissgib/plotting/heat/EPM161_heat_content.nc'
 d_nt = xr.open_mfdataset(path_old)
 datetimeindex = d_nt.indexes['time_counter'].to_datetimeindex()
 times_old = datetimeindex.values
 
 #new run 
-path_new = '/mnt/storage6/tahya/model_files/ETW162_heat_content.nc'
+path_new = '/project/6007519/weissgib/plotting/heat/ETW162_heat_content.nc'
 d_t = xr.open_mfdataset(path_new)
 datetimeindex = d_t.indexes['time_counter'].to_datetimeindex()
 times_new = datetimeindex.values
 
 #and the mask files for getting coastal regions
-mask_path = '/mnt/storage4/tahya/runoff/runoff_comp_regions.nc'
+mask_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_comp_regions.nc'
 
 mask_data = xr.open_mfdataset(mask_path)
 
@@ -34,13 +41,18 @@ for m in masks:
     new_ts = masked_new.sum(('x_grid_T', 'y_grid_T'))
     old_ts = masked_old.sum(('x_grid_T', 'y_grid_T'))
 
+    l = new_ts.shape[0]
+    print(new_ts)
+    print(old_ts)
+    exit()
+
+    old_ts = old_ts[:l]
+    times_old = times_old[:l]
     print(new_ts.shape)
     print(old_ts.shape)
 
-    old_ts = old_ts[:-1]
-
     #and plot
-    diff = ((new_ts-old_ts)/old_ts)*100
+    diff = (new_ts-old_ts)
     #plt.plot(times_new, new_ts, label='ETW161')
     #plt.plot(times_old, old_ts, label='EPM151')
 
@@ -50,7 +62,7 @@ for m in masks:
     plt.plot(times_old, diff)
     #plt.legend()
     plt.title(masks[m])
-    plt.savefig(m+'_heat_content_change_lim3.png')
+    plt.savefig(figs_path+m+'_heat_content_change_lim3.png')
     plt.clf()
 
 d_nt.close()

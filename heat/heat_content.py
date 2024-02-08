@@ -7,7 +7,7 @@ import netCDF4 as nc
 
 rho = 1025 #kg/m^3
 c_p = 3850 #K/(kgC)
-runid = 'ETW162'
+runid = 'EPM161'
 
 #paths
 path = "/project/6007519/weissgib/ANHA4/ANHA4-"+runid+"-S/"
@@ -54,7 +54,7 @@ for i in range(n):
         weight[i] = (d['deptht'][i] - d['deptht'][i-1])/dd
         dz[i] = d['deptht'][i] - d['deptht'][i-1]
 
-tmp = (-1.8-d)/-1.8
+tmp = rho*c_p*(d-1.8)
 
 x = d.sizes['x_grid_T']
 y = d.sizes['y_grid_T']
