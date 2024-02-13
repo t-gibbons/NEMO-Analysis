@@ -10,12 +10,13 @@ import xarray as xr
 import netCDF4 as nc
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
+import matplotlib.colors as colors
 import cartopy.crs as ccrs
 import cartopy.feature as feature
 
 ###this is for running script backend###
-#import matplotlib
-#matplotlib.use('Agg')
+import matplotlib
+matplotlib.use('Agg')
 ###----------------------------------###
 
 def heat_cont_diff(endyear, endmonth, endday, temp_id, notemp_id, startyear=2004, startmonth=1, startday=5):
@@ -39,38 +40,52 @@ def heat_cont_diff(endyear, endmonth, endday, temp_id, notemp_id, startyear=2004
     print('trying to read files')
     d_temp = xr.open_mfdataset(mdl_files_temp)
     d_no_temp = xr.open_mfdataset(mdl_files_notemp)
+    print(d_temp)
+    print(d_no_temp)
 
-    #no_temp_avg = d_no_temp['votemper'].resample(time_counter='Q-NOV').mean()
-    #temp_avg = d_temp['votemper'].resample(time_counter='Q-NOV').mean()
+    #seasonal
+    no_temp_avg = d_no_temp['votemper'].resample(time_counter='Q-NOV').mean()
+    temp_avg = d_temp['votemper'].resample(time_counter='Q-NOV').mean()
 
-    no_temp_avg = d_no_temp.groupby('time_counter.year').mean('time_counter')
-    temp_avg = d_temp.groupby('time_counter.year').mean('time_counter')
+    #annual
+    #no_temp_avg = d_no_temp.groupby('time_counter.year').mean('time_counter')
+    #temp_avg = d_temp.groupby('time_counter.year').mean('time_counter')
 
-    print(temp_avg)
-    print(no_temp_avg)
+    #times = temp_avg['year'].values
 
-    times = temp_avg['year'].values
+    #monthly average
+    #no_temp_avg = d_no_temp['votemper'].resample(time_counter='M').mean()
+    #temp_avg = d_temp['votemper'].resample(time_counter='M').mean()
 
-    #for t in times:
-    for y in range(temp_avg.dims['year']):
+    times = temp_avg['time_counter'].values
 
-        #st = t.strftime('%Y-%m-%d')
-        #print(st)
-        t = times[y]
-        print(t)
-        #if t.month == 2: season = 'DJF'
-        #if t.month == 5: season = 'MAM'
-        #if t.month == 8: season = 'JJA'
-        #if t.month == 11: season = 'SON'
+    for t in times:
+    #for y in range(temp_avg.dims['year']):
+        
+        #seasonal
+        st = t.strftime('%Y-%m-%d')
+        print(st)
 
+        if t.month == 2: season = 'DJF'
+        if t.month == 5: season = 'MAM'
+        if t.month == 8: season = 'JJA'
+        if t.month == 11: season = 'SON'
+
+        d1 = temp_avg.sel(time_counter=st).values
+        d2 = no_temp_avg.sel(time_counter=st).values
+        
+        #annual
+        #d1 = temp_avg['votemper'].isel(year=y).values
+        #d2 = no_temp_avg['votemper'].isel(year=y).values
+
+        #no avg
         #d1 = temp_avg.sel(time_counter=st).values
         #d2 = no_temp_avg.sel(time_counter=st).values
-        d1 = temp_avg.isel(year=y).values
-        d2 = no_temp_avg.isel(year=y).values
-        print(d1)
-        diff = ((d2-d1)/d1)*100
-        diff = diff[0,:,:]
 
+        diff = d1-d2
+        print(diff)
+        diff = diff[0,:,:]
+        """
         #north pole stero projection
         
         land_50m = feature.NaturalEarthFeature('physical', 'land', '50m', edgecolor='black', facecolor='gray', linewidth=0.5)
@@ -94,25 +109,25 @@ def heat_cont_diff(endyear, endmonth, endday, temp_id, notemp_id, startyear=2004
         ax.set_boundary(circle, transform=ax.transAxes)
         
         """
-        #hudson bay projection
+        #mackenzie river region
         land_50m = feature.NaturalEarthFeature('physical', 'land', '50m', edgecolor='black', facecolor='gray', linewidth=0.5)
         projection=projection=ccrs.Mercator(central_longitude=-80)
 
         fig = plt.figure(figsize=(10, 9))
         ax = plt.subplot(1, 1, 1, projection=projection)
 
-        ax.set_extent([-96,-68,50,67], crs=ccrs.PlateCarree())
+        ax.set_extent([-145,-119,67,72], crs=ccrs.PlateCarree())
         ax.add_feature(land_50m, color=[0.8, 0.8, 0.8])
         ax.coastlines(resolution='50m')
-        """
+        
 
-        p1 = ax.pcolormesh(lons, lats, diff, transform=ccrs.PlateCarree(), cmap='bwr', vmin=-15, vmax=15)
+        p1 = ax.pcolormesh(lons, lats, diff, transform=ccrs.PlateCarree(), cmap='bwr', vmin=-1e8, vmax=1e8)
         ax_cb = plt.axes([0.92, 0.25, 0.015, 0.5])
         cb = plt.colorbar(p1, cax=ax_cb, orientation='vertical')
-        cb.ax.set_ylabel('Percentage Difference in Heat Content')
+        cb.ax.set_ylabel('Difference in Heat Content')
         ax.gridlines()
         #plt.savefig(figs_path+'heat_cont_diff_'+temp_id+'_'+notemp_id+'_'+season+'_'+st+'.png')
-        plt.savefig(figs_path+'heat_cont_diff_'+temp_id+'_'+notemp_id+'_'+str(t)+'.png')
+        plt.savefig(figs_path+'heat_cont_diff__'+temp_id+'_'+notemp_id+'_'+st+'.png')
         #plt.show()
         plt.clf()
 
