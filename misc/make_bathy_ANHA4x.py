@@ -9,6 +9,7 @@ import netCDF4 as nc
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import cartopy.feature as feature
+import matplotlib.colors as colors
 
 anha4_file = '/project/6007519/ANHA4-I/ANHA4_bathy_etopo1_gebco1_smoothed_coast_corrected_mar10_Tide.nc'
 eorca_file = '/project/6007519/pennelly/eORCA025-I/eORCA025_Bathymetry.nc'
@@ -23,16 +24,16 @@ anha_lat = af['nav_lat'].values
 anha_bathy = af['Bathymetry'].values
 print(anha_bathy.shape)
 
+eorca_bathy = ef['Bathymetry'].values
+eorca_lon = ef['nav_lon'].values
+eorca_lat = ef['nav_lat'].values
+
 """
+#this is how figured out where to cut eorca to match anha
 lon_bd = anha_lon[799, :]
 lat_bd = anha_lat[799,:]
 
-print(lon_bd)
-print(lat_bd)
-
 #find where that lines up in the eOrca grid
-eorca_lon = ef['nav_lon'].values
-eorca_lat = ef['nav_lat'].values
 
 lon_start = np.where(eorca_lon == lon_bd[0])
 lat_start = np.where(eorca_lat == lat_bd[0])
@@ -42,7 +43,7 @@ lat_end = np.where(eorca_lat == lat_bd[-1])
 """
 
 #cheating and hardcoding where I think the matching line is in eOrca
-#should be j=1009, i=143:686
+#should be j=1009, i=143:686, found using output above
 #want to take a chunk which extends down to j=900
 
 eorca_bathy = ef['Bathymetry'].values
@@ -67,18 +68,15 @@ lon_rot = np.rot90(l1)
 l2 = np.rot90(lat_chunk)
 lat_rot = np.rot90(l2)
 
-#and we need to flip the array
-flip_chunk = np.flip(rot_chunk, axis=1)
-print(flip_chunk.shape)
-
-flip_lon = np.flip(lon_rot, axis=1)
-flip_lat = np.flip(lat_rot, axis=1)
-
-anhax_bathy = np.concatenate((anha_bathy, flip_chunk), axis=0)
+anhax_bathy = np.concatenate((anha_bathy, rot_chunk), axis=0)
 print(anhax_bathy.shape)
 
-anhax_lon = np.concatenate((anha_lon, flip_lon), axis=0)
-anhax_lat = np.concatenate((anha_lat, flip_lat), axis=0)
+anhax_lon = np.concatenate((anha_lon, lon_rot), axis=0)
+anhax_lat = np.concatenate((anha_lat, lat_rot), axis=0)
+
+#plt.pcolormesh(anhax_bathy, vmin=0, vmax=100)
+#plt.show()
+
 
 #lets try plotting the new anhax on a map
 land_50m = feature.NaturalEarthFeature('physical', 'land', '50m', edgecolor='black', facecolor='gray', linewidth=0.5)
@@ -86,10 +84,10 @@ land_50m = feature.NaturalEarthFeature('physical', 'land', '50m', edgecolor='bla
 fig = plt.figure(figsize=(10,9))
 ax = plt.subplot(1,1,1, projection=ccrs.NorthPolarStereo())
 
-ax.add_feature(land_50m, color=[0.8,0.8,0.8])
+#ax.add_feature(land_50m, color=[0.8,0.8,0.8])
 ax.coastlines(resolution='50m')
 
-p1 = ax.pcolormesh(anhax_lon, anhax_lat, anhax_bathy, transform=ccrs.PlateCarree(), vmin=0, vmax=1000)
+p1 = ax.pcolormesh(anhax_lon, anhax_lat, anhax_bathy, transform=ccrs.PlateCarree())
 ax_cb = plt.axes([0.92, 0.25, 0.015, 0.5])
 cb = plt.colorbar(p1, cax=ax_cb, orientation='vertical')
 plt.show()
