@@ -6,15 +6,21 @@ import xarray as xr
 import pandas as pd
 import matplotlib.pyplot as plt
 
+###this is for running script backend###
+#import matplotlib
+#matplotlib.use('Agg')
+###----------------------------------###
+
+
 #get list of all data files
 
-root_dir = '/project/6007519/weissgib/plotting/figs/transports/'
+root_dir = '/project/6007519/weissgib/plotting/transports/'
 fig_path = '/project/6007519/weissgib/plotting/transports/'
 
-files = glob.glob(root_dir+'davis_strait_freshwater_transport_*.nc')
+files = glob.glob(root_dir+'fram_strait_freshwater_transport_*.nc')
 
 #also plot observed values
-obs_davis = True
+obs_davis = False
 obs_nares = False
 obs_barrow = False
 
@@ -164,11 +170,11 @@ print(avg)
 avg['diff'] = ((abs(avg['A-HYPE'])-abs(avg['Dai and Trenberth']))/abs(avg['Dai and Trenberth']))*100
 mean = avg['diff'].mean()
 print(mean)
-#mean15 = avg['Dai and Trenberth'].mean()
-#mean151 = avg['A-HYPE'].mean()
+mean15 = avg['Dai and Trenberth'].mean()
+mean151 = avg['A-HYPE'].mean()
 #meanobs = avg['Observations'].mean()
-#print(mean15)
-#print(mean151)
+print("Dai mean: "+str(mean15))
+print("A-HYPE mean: "+str(mean151))
 #print(meanobs)
 
 #just output the annual average
@@ -177,18 +183,21 @@ print(annual_avg)
 
 #rd.plot()
 #rd["2009-01-03":"2010'12'31"].plot()
-avg['diff'].plot()
-plt.axhline(y=mean, color='C0', linestyle='--')
-#avg.plot()
-#plt.axhline(y=mean151, color='C0', linestyle='--')
-#plt.axhline(y=mean15, color='C1', linestyle='--')
+#avg['diff'].plot()
+#plt.axhline(y=mean, color='C0', linestyle='--')
+avg['A-HYPE'].plot()
+avg['Dai and Trenberth'].plot()
+plt.axhline(y=mean151, color='C0', linestyle='--')
+plt.axhline(y=mean15, color='C1', linestyle='--')
 #plt.axhline(y=meanobs, color='C2', linestyle='--')
 ax = plt.gca()
-ax.set_ylim([-30, 30])
+#ax.set_ylim([-100, 100])
 plt.grid(True)
-plt.title('Davis Strait')
-plt.ylabel('percentage change freshwater transport')
+plt.title('Fram Strait')
+plt.legend()
+#plt.ylabel('percentage change freshwater transport')
+plt.ylabel('freshwater transport (Sv)')
 
 #plt.show()
-plt.savefig(fig_path+'time_series_freshwater_transport_davis_strait_CGRF_change.png')
+plt.savefig(fig_path+'time_series_freshwater_transport_fram_strait_CGRF.png')
 plt.clf()

@@ -15,13 +15,16 @@ import netCDF4 as nc
 
 #gets the list of grid points for a straight section between two points
 #uses the bresenham line algorithm
-def section_calculation(x1, x2, y1, y2):
+
+def plotLineLow(x0, x1, y0, y1):
+
+    print("low line!")
 
     ii = []
     jj = []
 
-    dx = x2-x1
-    dy = y2-y1
+    dx = x1 -x0
+    dy = y1 - y0
     yi = 1
 
     if dy < 0:
@@ -29,23 +32,72 @@ def section_calculation(x1, x2, y1, y2):
         dy = -dy
 
     D = (2*dy) - dx
-    y = y1
+    y = y0
 
-    for x in range(x1,x2):
+    for x in range(x0, x1):
         ii.append(x)
         jj.append(y)
         if D > 0:
-            y = y +yi
-            D = D + (2*(dy-dx))
+            y = y+yi
+            D = D+(2*(dy-dx))
             ii.append(x)
             jj.append(y)
         else:
-            D = D + 2*dy
+            D = D+2*dy
 
     return ii, jj
 
+
+def plotLineHigh(x0, x1, y0, y1):
+
+    print("high line!")
+
+    ii = []
+    jj = []
+
+    dx = x1 - x0
+    dy = y1 - y0
+    xi = 1
+
+    if dx < 0:
+        xi = -1
+        dx = -dx
+    D = (2*dx) - dy
+    x = x0
+
+    for y in range(y0, y1):
+        ii.append(x)
+        jj.append(y)
+        if D > 0:
+            x = x+xi
+            D = D + (2*(dx-dy))
+            ii.append(x)
+            jj.append(y)
+        else:
+            D = D + 2*dx
+
+    return ii, jj
+
+
+def section_calculation(x0, x1, y0, y1):
+
+    if abs(y1-y0) < abs(x1-x0):
+        if x0 > x1:
+            ii, jj = plotLineLow(x1, x0, y1, y0)
+        else:
+            ii, jj = plotLineLow(x0, x1, y0, y1)
+
+    else:
+            if y0 > y1:
+                ii, jj = plotLineHigh(x1, x0, y1, y0)
+            else:
+                ii, jj = plotLineHigh(x0, x1, y0, y1)
+
+    return ii, jj
+
+
 def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, startmonth=1, startday=5):
-    figs_path = '/project/6007519/weissgib/plotting/figs/transports/'
+    figs_path = '/project/6007519/weissgib/plotting/transports/'
     path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
     other_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/'
 
@@ -115,8 +167,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     #section = 'fram_strait'
     #ii, jj = section_calculation(304, 360, 503, 526)
 
-    section = 'davis_strait_south'
-    ii, jj = section_calculation(175,214,443,443)
+    #section = 'davis_strait_south'
+    #ii, jj = section_calculation(175,214,443,443)
 
     #section = 'bering_strait'
     #ii,jj = section_calculation(222, 237, 783, 791)
@@ -135,6 +187,15 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
 
     #section = 'fram_south'
     #ii, jj = section_calculation(327,336,508,510)
+    
+    #section = 'barent_sea'
+    #ii, jj = section_calculation(371, 413, 512, 480)
+
+    #section = 'mack_coast'
+    #ii, jj = section_calculation(140, 154, 716, 709)
+
+    section = 'sib_coast'
+    ii, jj = section_calculation(313, 284, 760, 729)
 
     t = du.dims['time_counter']
     total_volume = []
@@ -271,4 +332,4 @@ if __name__ == "__main__":
     transport_calculations(runid='EPM151', endyear=2018, endmonth=12, endday=31)
     transport_calculations(runid='EPM152', endyear=2018, endmonth=12, endday=31)
     transport_calculations(runid='EPM014', endyear=2019, endmonth=8, endday=23)
-    transport_calculations(runid='EPM015', endyear=2019, endmonth=12, endday=31)
+    transport_calculations(runid='EPM015', endyear=2019, endmonth=12, endday=21)
