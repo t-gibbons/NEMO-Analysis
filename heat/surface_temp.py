@@ -78,7 +78,7 @@ for t in times:
 
     #p1 = ax.pcolormesh(lons, lats, temp, transform=ccrs.PlateCarree(), cmap='winter')
     #p1 = df.isel(time_counter=0, deptht=0).plot(subplot_kws=dict(projection=projection), transform=ccrs.PlateCarree(), cmap='viridis')#, vmin=-5, vmax=20)
-    p1 = surface_temp.sel(time_counter=t).plot(x='nav_lon_grid_T', y='nav_lat_grid_T', subplot_kws=dict(projection=projection), transform=ccrs.PlateCarree(), cmap='winter', vmin=-2, vmax=10)
+    p1 = surface_temp.sel(time_counter=t).plot(x='nav_lon_grid_T', y='nav_lat_grid_T', subplot_kws=dict(projection=projection), transform=ccrs.PlateCarree(), cmap='winter', vmin=-2, vmax=6)
     #ax_cb = plt.axes([0.92, 0.25, 0.015, 0.5])
     #cb = plt.colorbar(p1, cax=ax_cb, orientation='vertical')
     #cb.ax.set_ylabel('Surface Temperature')

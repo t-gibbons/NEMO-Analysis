@@ -169,9 +169,9 @@ def transport_calculations(runid, endyear, endmonth, endday, lim3=False, startye
         ice_frac = di['ileadfra'].isel(y=j1, x=i1)
 
         if negative:
-            vol = -v*ice_thick*cell_width*ice_frac
+            vol = -v*ice_thick*cell_width
         else:
-            vol = v*ice_thick*cell_width*ice_frac
+            vol = v*ice_thick*cell_width
 
         total_ice.append(vol)
 
@@ -188,4 +188,4 @@ def transport_calculations(runid, endyear, endmonth, endday, lim3=False, startye
     di.close()
 			
 if __name__ == "__main__":
-    transport_calculations(runid='EPM161', endyear=2018, endmonth=12, endday=31, lim3=True)
+    transport_calculations(runid='ETW162', endyear=2018, endmonth=12, endday=31, lim3=True)

@@ -69,6 +69,8 @@ davis_ln,davis_lt = get_section_line(175,214,443,443,lons,lats)
 
 fram_ln,fram_lt = get_section_line(304,360,503,526,lons,lats)
 
+barent_ln, barent_lt = get_section_line(512, 480, 371, 413, lons, lats)
+
 #and plot
 
 land_50m = feature.NaturalEarthFeature('physical', 'land', '50m', edgecolor='black', facecolor='gray', linewidth=0.5)

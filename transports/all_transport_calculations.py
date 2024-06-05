@@ -282,7 +282,6 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
             heat = -v*temp*cell_thickness*cell_width
             salt = -v*sal*cell_thickness*cell_width
         else:
-            continue
             vol = v*cell_thickness*cell_width
             fw = v*fwc*cell_thickness*cell_width
             heat = v*temp*cell_thickness*cell_width

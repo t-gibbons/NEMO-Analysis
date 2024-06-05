@@ -10,7 +10,7 @@ from matplotlib.ticker import MaxNLocator
 #new runoff
 path = '/project/6007519/ANHA4-I/RUNOFF/HydroGFD/'
 
-start_year = 2008
+start_year = 2002
 end_year = 2019
 data = []
 
@@ -73,7 +73,6 @@ for m in masks:
     hype_mean = np.mean(new_timeseries.groupby('time_counter.year').mean().values)
     print('Dai annual average mean '+masks[m]+' : '+str(dai_mean))
     print('HYPE annual average mean '+masks[m]+' : '+str(hype_mean))
-    exit()
 
     new_timeseries = new_timeseries.groupby('time_counter.year').mean('time_counter')
     old_timeseries = old_timeseries.groupby('time_counter.year').mean('time_counter')
@@ -98,18 +97,44 @@ for m in masks:
         else: 
             ot1[i] = last_year
         #ot1[i] = ot[i]
-   
+
+    print(dn)
     ax = plt.figure().gca()
     ax.plot(dn, nt, label='A-HYPE')
     ax.plot(dn, ot1, label='Dai and Trenberth')
     plt.legend()
     #plt.title(masks[m])
-    plt.ylabel('runoff ($\mathregular{m^3/s}$)')
-    plt.tight_layout()
+    ax.set_ylabel('runoff ($\mathregular{m^3/s}$)')
+    #plt.tight_layout()
     ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     #plt.show()
-    plt.savefig('/project/6007519/weissgib/plotting/figs/runoff/'+m+'_runoff_comp_annual.png')
-    plt.clf()
+    #plt.savefig('/project/6007519/weissgib/plotting/figs/runoff/'+m+'_runoff_comp_annual.png')
+    #plt.clf()
+
+#lets overlay the AO index on the monthly average runoff
+ao_path = '/project/6007519/weissgib/plotting/data_files/observations/monthly_ao_index_b50_current.ascii'
+
+ao = pd.read_csv(ao_path, names=['year', 'month', 'AO index'], header=None, delimiter='   ')
+
+#just want the index between 2002-2019
+ao = ao[ao.year >= 2002]
+ao = ao[ao.year <= 2019]
+
+ao['day'] = 1
+
+ao['date'] = pd.to_datetime(ao[['year', 'month', 'day']])
+
+#take the annual average
+mean = ao.groupby(ao.date.dt.year)['AO index'].mean()
+print(mean)
+
+ax2 = ax.twinx()
+
+ax2.plot(mean, color='g', label='AO Index')
+ax.set_ylabel('Annual Average Runoff')
+ax2.set_ylabel('AO Index', color='g')
+
+plt.show()
 
 exit()
 #and lets make the same plot but for the whole region
