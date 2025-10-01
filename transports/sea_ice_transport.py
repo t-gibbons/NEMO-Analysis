@@ -12,19 +12,22 @@ import numpy as np
 import xarray as xr
 import netCDF4 as nc
 import matplotlib.pyplot as plt
-import matplotlib.path as mpath
-import cartopy.crs as ccrs
-import cartopy.feature as feature
+#import matplotlib.path as mpath
+#import cartopy.crs as ccrs
+#import cartopy.feature as feature
 
 #gets the list of grid points for a straight section between two points
 #uses the bresenham line algorithm
-def section_calculation(x1, x2, y1, y2):
+
+def plotLineLow(x0, x1, y0, y1):
+
+    print("low line!")
 
     ii = []
     jj = []
 
-    dx = x2-x1
-    dy = y2-y1
+    dx = x1 -x0
+    dy = y1 - y0
     yi = 1
 
     if dy < 0:
@@ -32,26 +35,74 @@ def section_calculation(x1, x2, y1, y2):
         dy = -dy
 
     D = (2*dy) - dx
-    y = y1
+    y = y0
 
-    for x in range(x1,x2):
+    for x in range(x0, x1):
         ii.append(x)
         jj.append(y)
         if D > 0:
-            y = y +yi
-            D = D + (2*(dy-dx))
+            y = y+yi
+            D = D+(2*(dy-dx))
             ii.append(x)
             jj.append(y)
         else:
-            D = D + 2*dy
+            D = D+2*dy
 
     return ii, jj
 
-def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, startmonth=1, startday=5):
-    figs_path = '/project/6007519/weissgib/plotting/transports/'
+def plotLineHigh(x0, x1, y0, y1):
+
+    print("high line!")
+
+    ii = []
+    jj = []
+
+    dx = x1 - x0
+    dy = y1 - y0
+    xi = 1
+
+    if dx < 0:
+        xi = -1
+        dx = -dx
+    D = (2*dx) - dy
+    x = x0
+
+    for y in range(y0, y1):
+        ii.append(x)
+        jj.append(y)
+        if D > 0:
+            x = x+xi
+            D = D + (2*(dx-dy))
+            ii.append(x)
+            jj.append(y)
+        else:
+            D = D + 2*dx
+
+    return ii, jj
+
+def section_calculation(x0, x1, y0, y1):
+
+    if abs(y1-y0) < abs(x1-x0):
+        if x0 > x1:
+            ii, jj = plotLineLow(x1, x0, y1, y0)
+        else:
+            ii, jj = plotLineLow(x0, x1, y0, y1)
+
+    else:
+            if y0 > y1:
+                ii, jj = plotLineHigh(x1, x0, y1, y0)
+            else:
+                ii, jj = plotLineHigh(x0, x1, y0, y1)
+
+    return ii, jj
+
+
+def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, startmonth=1, startday=5, lim3=False):
+    figs_path = '/project/6007519/weissgib/plotting/sea_ice/'
     path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
     #path = "/project/6007519/weissgib/ANHA4/ANHA4-"+runid+"-S/"
     other_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/'
+    bad_path = '/project/6007519/weissgib/plotting/data_files/bad_files/'
 
     start_time = datetime.date(startyear, startmonth, startday)
 
@@ -74,10 +125,13 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     mdl_files_ice = []
     for t in times:
         mdl_files_ice.append(path+"ANHA4-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
-    
-    #path = "/project/6000276/weissgib/ANHA4/ANHA4-"+runid+"-S/"
 
-    #mdl_files_ice = glob.glob(path+'ANHA4-'+runid+'_icemod_*.nc')
+    #dont try to open the corrupted ice files 
+    #with open (bad_path+runid+"_bad_ice_files.txt", "r") as file:
+        #bad_files = eval(file.readline())
+
+    #mdl_files_ice = [x for x in mdl_files_ice if x not in bad_files]
+
     di = xr.open_mfdataset(mdl_files_ice, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
 
     #read in the mask file
@@ -86,8 +140,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
 	
     nav_lon = np.array(mf.variables['nav_lon'])
     nav_lat = np.array(mf.variables['nav_lat'])
-    e1v = np.array(mf.variables['e1v'])[0,:,:]
-    e2u = np.array(mf.variables['e2u'])[0,:,:]
+    e1t = np.array(mf.variables['e1t'])[0,:,:]
+    e2t = np.array(mf.variables['e2t'])[0,:,:]
     
     mf.close()
 
@@ -96,8 +150,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     #and to see which velocity components are needed at each grid space
 	
     #straight line
-    section = 'fram_strait'
-    ii, jj = section_calculation(304, 360, 503, 526)
+    #section = 'fram_strait'
+    #ii, jj = section_calculation(304, 360, 503, 526)
 
     #section = 'davis_strait'
     #ii, jj = section_calculation(175,214,443,443)
@@ -105,8 +159,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     #section = 'bering_strait'
     #ii,jj = section_calculation(222, 237, 783, 791)
 
-    #section = 'nares_strait'
-    #ii, jj = section_calculation(197,214,537,522)
+    section = 'nares_strait'
+    ii, jj = section_calculation(197,214,537,522)
 
     #section = 'labrador_current_2'
     #ii, jj = section_calculation(174, 199, 330, 308)
@@ -145,7 +199,7 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
             v = vt.isel(y=j1, x=i1)
             v = v.rename('vel')
             
-            cell_width = np.ones(v.shape)*e1v[j1,i1]
+            cell_width = np.ones(v.shape)*e1t[j1,i1]
 
         elif i1 == i1:
 
@@ -153,15 +207,25 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
             v = vt.isel(y=j1, x=i1)
             v = v.rename('vel')
             
-            cell_width = np.ones(v.shape)*e2u[j1,i1]
+            cell_width = np.ones(v.shape)*e2t[j1,i1]
 
-        ice_thick = di['iicethic'].isel(y=j1, x=i1)
-        ice_frac = di['ileadfra'].isel(y=j1, x=i1)
+        #if lim3, get the ice thickness by finding the thickness in each category
+        if lim3:
+            t_ice = di['iiceethick_cat']*di['ileadfra_cat']
+
+            #and sum over the categories
+            ice_thick = np.sum(t_ice, axis=1)
+            ice_thick = ice_thick.isel(y=j1, x=i1)
+
+        else:
+
+            ice_thick = di['iicethic'].isel(y=j1, x=i1)
+
 
         if negative:
-            vol = -v*ice_thick*cell_width*ice_frac
+            vol = -v*ice_thick*cell_width
         else:
-            vol = v*ice_thick*cell_width*ice_frac
+            vol = v*ice_thick*cell_width
 
         total_ice.append(vol)
 
@@ -177,4 +241,4 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     di.close()
 			
 if __name__ == "__main__":
-    transport_calculations(runid='EPM151', endyear=2019, endmonth=4, endday=5)
+    transport_calculations(runid='EPM151', endyear=2018, endmonth=12, endday=31, lim3 = False)

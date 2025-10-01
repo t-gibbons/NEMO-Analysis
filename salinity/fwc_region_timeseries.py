@@ -24,8 +24,8 @@ matplotlib.use('Agg')
 
 long_names = {'EPM101': 'Old HYPE, CGRF', 'EPM102': 'Old HYPE, ERA', 'EPM151': 'A-HYPE', 'EPM152': 'HYPE, ERA','EPM014': 'Dai and Trenberth, ERA', 'EPM015': 'Dai and Trenberth'}
 
-#path = '/project/6007519/weissgib/plotting/data_files/freshwater_content/'
-path = '/project/6007519/weissgib/plotting/batch_job_scripts/'
+path = '/project/6007519/weissgib/plotting/data_files/freshwater_content/'
+#path = '/project/6007519/weissgib/plotting/batch_job_scripts/'
 fig_path = '/project/6007519/weissgib/plotting/fwc_figs/'
 #mask_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_temp_regions_mask.nc'
 mask_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_comp_regions.nc'
@@ -34,6 +34,9 @@ mask_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_co
 
 #regions = {'caa_mask': 'Canadian Arctic Archipelago', 'ca_mask': 'Central Arctic', 'cs_mask': 'Canadian Shelf', 'cb_mask': 'Canadian Basin', 'eb_mask': 'Eurasian Basin', 'ss_mask': 'Siberian Shelf', 'ds_mask': 'Davis Strait', 'hb_mask': 'Hudson Bay', 'bs_mask': 'Bering Strait', 'ls_mask': 'Labrador Sea', 'ns_mask': 'Nares Strait', 'fs_mask': 'Fram Strait', 'lc_mask': 'Labrador Current'}
 regions = {'full_arctic': 'Total Arctic'}
+
+#large font for publications
+plt.rcParams.update({'font.size': 18})
 
 def read_mask(runids, long_name):
 
@@ -45,7 +48,7 @@ def read_mask(runids, long_name):
     date = []
 
     for exp in runids:
-        fwc_file = path+exp+'_surface_salinity.nc'
+        fwc_file = path+exp+'_fwc_34.8_isohaline_0m.nc'
     
         df = xr.open_mfdataset(fwc_file)
     
@@ -120,18 +123,19 @@ def fwc_region_diff(runids, long_name=False):
         rd = df.loc[df['region'] == r]
         rd = rd.pivot(index='date', columns='experiment', values='fwc')
         rd['diff'] = rd[runids[0]] - rd[runids[1]]
-        rd['diff'].plot()
+        ax = rd['diff'].plot()
         plt.grid(True)
         plt.title(regions[r]+' Freshwater Content Difference')
         plt.ylabel('freshwater content (m)')
         #plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05),ncol=2, fancybox=True, shadow=True)
-        plt.legend()
+        #plt.legend()
+        ax.set_xlim(pd.Timestamp('2002-01-31'), pd.Timestamp('2018-12-31'))
         plt.tight_layout()
         #plt.show()
-        plt.savefig(fig_path+r+'_fwc_34.8_isohaline_timeseries_diff_cgrf.png')
+        plt.savefig(fig_path+r+'_fwc_34.8_isohaline_timeseries_diff_cgrf.png', dpi=300)
         plt.clf()
 
 
 if __name__ == "__main__":
-    fwc_region_comp(runids = ['EPM151', 'EPM015'], long_name=True)
-    #fwc_region_diff(runids = ['EPM151', 'EPM015'])
+    #fwc_region_comp(runids = ['EPM151', 'EPM015'], long_name=True)
+    fwc_region_diff(runids = ['EPM151', 'EPM015'])

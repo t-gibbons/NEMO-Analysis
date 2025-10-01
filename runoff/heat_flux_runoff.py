@@ -46,7 +46,7 @@ def yang_heat_flux():
 
     #masks = {'hb_mask': 'Hudson Bay', 'bs_mask': 'Mackenzie River Region', 'bs_east_mask': 'Eastern Bering Strait', 'laptev_mask': 'Laptev Sea'}
     #masks = {'caa_mask': 'Canadian Arctic Archipelago','kara_mask': 'Kara Sea'}
-    masks = {'hb_mask': 'Hudson Bay', 'bs_mask': 'Mackenzie River Region', 'bs_east_mask': 'Eastern Bering Strait', 'laptev_mask': 'Laptev Sea', 'caa_mask': 'Canadian Arctic Archipelago','kara_mask': 'Kara Sea'}
+    masks = {'hb_mask': 'Hudson Bay', 'bs_mask': 'Barent Sea', 'bs_east_mask': 'East Siberian Sea', 'laptev_mask': 'Laptev Sea', 'caa_mask': 'Canadian Arctic Archipelago','kara_mask': 'Kara Sea'}
     #masks = {'all_masks': 'All Mask Area'}
 
     total_heat_flux = []
@@ -94,7 +94,7 @@ def yang_heat_flux():
     #print(total_heat_flux)
     #print(np.sum(total_heat_flux))
     plt.title('Average Monthly Heat Flux')
-    plt.ylabel('heat flux (10^6 MJ)')
+    plt.ylabel('heat flux (TJ)')
     plt.legend()
     ax = plt.gca()
     ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
@@ -174,7 +174,8 @@ def whitefield_total_heat():
 
 
 if __name__ == "__main__":
-    whitefield_total_heat()
+    #whitefield_total_heat()
+    yang_heat_flux()
 
 
 

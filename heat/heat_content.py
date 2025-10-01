@@ -6,11 +6,11 @@ import netCDF4 as nc
 #constants
 
 rho = 1025 #kg/m^3
-c_p = 3850 #K/(kgC)
-runid = 'EPM151'
+c_p = 3850 #J/(kgC)
+runid = 'ETW162'
 
 #paths
-path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
+path = "/project/6007519/weissgib/ANHA4/ANHA4-"+runid+"-S/"
 grid_file = '/project/6007519/weissgib/plotting/data_files/anha4_files/ANHA4_mesh_mask.nc'
 output_path = '/project/6007519/weissgib/plotting/heat/'
 
@@ -54,7 +54,7 @@ for i in range(n):
         weight[i] = (d['deptht'][i] - d['deptht'][i-1])/dd
         dz[i] = d['deptht'][i] - d['deptht'][i-1]
 
-tmp = rho*c_p*(d-1.8)
+tmp = rho*c_p*(d+1.8)
 
 x = d.sizes['x_grid_T']
 y = d.sizes['y_grid_T']
@@ -66,4 +66,4 @@ t1 = tmp*dz_grid
 
 heat_content = t1.sum(dim='deptht', skipna=True)
 
-heat_content.to_netcdf(output_path+runid+'_heat_content.nc')
+heat_content.to_netcdf(output_path+runid+'_heat_content_new.nc')

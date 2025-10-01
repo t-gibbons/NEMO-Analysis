@@ -11,13 +11,15 @@ import matplotlib.pyplot as plt
 #matplotlib.use('Agg')
 ###----------------------------------###
 
+#increase the font size
+plt.rcParams.update({'font.size': 18})
 
 #get list of all data files
 
-root_dir = '/project/6007519/weissgib/plotting/transports/'
+root_dir = '/project/6007519/weissgib/plotting/figs/transports/'
 fig_path = '/project/6007519/weissgib/plotting/transports/'
 
-files = glob.glob(root_dir+'fram_strait_freshwater_transport_*.nc')
+files = glob.glob(root_dir+'davis_strait_freshwater_transport_*.nc')
 
 #also plot observed values
 obs_davis = False
@@ -33,7 +35,6 @@ for f in files:
     file_name = file_name.replace('.nc', '')
     exp = file_name[-6:]
     print(exp)
-    
     
     if exp == 'EPM101':
         continue
@@ -78,8 +79,8 @@ if obs_davis:
     obs_path = '/project/6007519/weissgib/plotting/data_files/observations/DS0413_dOAtrans.mat'
 
     od = scipy.io.loadmat(obs_path)
-    fw_transport = od['FW_dtrans'][:,0]*0.001
-    #fw_transport = od['V_dtrans'][:,0]
+    #fw_transport = od['FW_dtrans'][:,0]*0.001
+    fw_transport = od['V_dtrans'][:,0]
     dates = od['dates'][0,:]
 
     timestamps = pd.to_datetime(dates-719529, unit='D')
@@ -165,11 +166,12 @@ print(mean)
 #now lets make the time series for each region
 rd = df.pivot(index='date', columns='experiment', values='volume_transport')
 avg = rd.resample('M').mean() #take the monthly mean
-#avg = avg.loc["2008-01-01":"2018-12-31"]
+avg = avg.loc["2008-01-01":"2018-12-31"]
 print(avg)
-avg['diff'] = ((abs(avg['A-HYPE'])-abs(avg['Dai and Trenberth']))/abs(avg['Dai and Trenberth']))*100
+avg['diff'] = ((avg['A-HYPE']-avg['Dai and Trenberth'])/avg['Dai and Trenberth'])*100
+#avg['diff'] = (avg['A-HYPE']-avg['Dai and Trenberth'])
 mean = avg['diff'].mean()
-print(mean)
+print("Difference mean: "+str(mean))
 mean15 = avg['Dai and Trenberth'].mean()
 mean151 = avg['A-HYPE'].mean()
 #meanobs = avg['Observations'].mean()
@@ -183,21 +185,26 @@ print(annual_avg)
 
 #rd.plot()
 #rd["2009-01-03":"2010'12'31"].plot()
-#avg['diff'].plot()
-#plt.axhline(y=mean, color='C0', linestyle='--')
-avg['A-HYPE'].plot()
-avg['Dai and Trenberth'].plot()
-plt.axhline(y=mean151, color='C0', linestyle='--')
-plt.axhline(y=mean15, color='C1', linestyle='--')
+avg['diff'].plot()
+plt.axhline(y=mean, color='C0', linestyle='--')
+#avg['A-HYPE'].plot()
+#avg['Dai and Trenberth'].plot()
+#avg['Observations'].plot()
+#plt.axhline(y=mean151, color='C0', linestyle='--')
+#plt.axhline(y=mean15, color='C1', linestyle='--')
 #plt.axhline(y=meanobs, color='C2', linestyle='--')
 ax = plt.gca()
-#ax.set_ylim([-100, 100])
+ax.set_ylim([-30, 30])
 plt.grid(True)
-plt.title('Fram Strait')
-plt.legend()
-#plt.ylabel('percentage change freshwater transport')
-plt.ylabel('freshwater transport (Sv)')
+plt.title('Davis Strait')
+#ax.set_xlim(pd.Timestamp('2005-01-31'), pd.Timestamp('2018-12-31'))
+#plt.legend()
+ax.figure.autofmt_xdate()
+plt.ylabel('percentage change freshwater transport')
+#plt.ylabel('volume transport (Sv)')
+plt.tight_layout()
 
 #plt.show()
-plt.savefig(fig_path+'time_series_freshwater_transport_fram_strait_CGRF.png')
+plt.savefig(fig_path+'time_series_freshwater_transport_davis_strait_CGRF_diff.png', dpi=300)
+
 plt.clf()

@@ -50,8 +50,8 @@ mask_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/runoff_co
 mask_data = xr.open_mfdataset(mask_path)
 
 #masks = {'bay_mask': 'Ungava Bay'}
-#masks = {'hb_mask': 'Hudson Bay', 'caa_mask': 'Canadian Arctic Archipelago', 'bs_mask': 'Mackenzie Region', 'bs_east_mask': 'Eastern Bering Strait', 'nc_mask': 'North Coast', 'kara_mask': 'Kara Seas', 'laptev_mask': 'Laptev Sea'}
-masks = {'high_arctic': 'Arctic'} #'full_arctic': 'Full Arctic'}
+masks = {'hb_mask': 'Hudson Bay', 'caa_mask': 'Canadian Arctic Archipelago', 'bs_mask': 'Mackenzie Region', 'bs_east_mask': 'Eastern Bering Strait', 'nc_mask': 'North Coast', 'kara_mask': 'Kara Sea', 'laptev_mask': 'Laptev Sea'}
+#masks = {'high_arctic': 'Arctic'} #'full_arctic': 'Full Arctic'}
 
 #lets make some time series over these regions
 for m in masks:
@@ -102,7 +102,7 @@ for m in masks:
     ax = plt.figure().gca()
     ax.plot(dn, nt, label='A-HYPE')
     ax.plot(dn, ot1, label='Dai and Trenberth')
-    plt.legend()
+    #plt.legend()
     #plt.title(masks[m])
     ax.set_ylabel('runoff ($\mathregular{m^3/s}$)')
     #plt.tight_layout()

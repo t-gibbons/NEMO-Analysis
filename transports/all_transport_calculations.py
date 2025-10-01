@@ -13,6 +13,13 @@ import numpy as np
 import xarray as xr
 import netCDF4 as nc
 
+#dont try to open the corrupted files
+def remove_bad_files(bad_path, runid, file_type, mdl_files):
+    with open (bad_path+runid+"_bad_"+file_type+"_files.txt", "r") as file:
+        bad_files = eval(file.readline())
+
+    return [x for x in mdl_files if x not in bad_files]
+
 #gets the list of grid points for a straight section between two points
 #uses the bresenham line algorithm
 
@@ -98,8 +105,9 @@ def section_calculation(x0, x1, y0, y1):
 
 def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, startmonth=1, startday=5):
     figs_path = '/project/6007519/weissgib/plotting/transports/'
-    path = "/project/6007519/pmyers/ANHA4/ANHA4-"+runid+"-S/"
+    path = "/project/6007519/weissgib/ANHA4/ANHA4-"+runid+"-S/"
     other_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/'
+    bad_path = '/project/6007519/weissgib/plotting/data_files/bad_files/'
 
     start_time = datetime.date(startyear, startmonth, startday)
 
@@ -128,9 +136,22 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
         mdl_files_u.append(path+"ANHA4-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridU.nc")
         mdl_files_t.append(path+"ANHA4-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridT.nc")
 
+    mdl_files_v = remove_bad_files(bad_path, runid, 'v', mdl_files_v)
+    mdl_files_u = remove_bad_files(bad_path, runid, 'u', mdl_files_u)
+    mdl_files_t = remove_bad_files(bad_path, runid, 't', mdl_files_t)
+
     dv = xr.open_mfdataset(mdl_files_v, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
     du = xr.open_mfdataset(mdl_files_u, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
     dt = xr.open_mfdataset(mdl_files_t, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
+
+    #take the monthly average to deal with missing files
+    dv = dv.resample(time_counter='M').mean()
+    du = du.resample(time_counter='M').mean()
+    dt = dt.resample(time_counter='M').mean()
+
+    print(dv)
+    print(du)
+    print(dt)
 
     #read in the mask file
     mask_file = other_path+'ANHA4_mesh_mask.nc'
@@ -164,8 +185,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     #and to see which velocity components are needed at each grid space
 	
     #straight line
-    #section = 'fram_strait'
-    #ii, jj = section_calculation(304, 360, 503, 526)
+    section = 'fram_strait'
+    ii, jj = section_calculation(304, 360, 503, 526)
 
     #section = 'davis_strait_south'
     #ii, jj = section_calculation(175,214,443,443)
@@ -194,8 +215,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     #section = 'mack_coast'
     #ii, jj = section_calculation(140, 154, 716, 709)
 
-    section = 'sib_coast'
-    ii, jj = section_calculation(313, 284, 760, 729)
+    #section = 'sib_coast_2'
+    #ii, jj = section_calculation(395, 380, 706, 686)
 
     t = du.dims['time_counter']
     total_volume = []
@@ -328,7 +349,5 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     du.close()
 
 if __name__ == "__main__":
-    transport_calculations(runid='EPM151', endyear=2018, endmonth=12, endday=31)
-    transport_calculations(runid='EPM152', endyear=2018, endmonth=12, endday=31)
-    transport_calculations(runid='EPM014', endyear=2019, endmonth=8, endday=23)
-    transport_calculations(runid='EPM015', endyear=2019, endmonth=12, endday=21)
+    transport_calculations(runid='EPM161', endyear=2018, endmonth=12, endday=31)
+    transport_calculations(runid='ETW162', endyear=2018, endmonth=12, endday=31)
