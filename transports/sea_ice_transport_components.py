@@ -1,9 +1,8 @@
 """
-October 2022
+October 2025
 Author: Tahya Weiss-Gibbons (weissgib@ualberta.ca)
 
-Calculates the sea ice transport across a section
-Need to know the begining and end grid points of your line, as well as time period and model run to calculate for
+Calculates the speed and volume components of the sea ice transport across a set line
 """
 import math
 import glob
@@ -128,7 +127,7 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     for t in times:
         mdl_files_ice.append(path+"ANHA4-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_icemod.nc")
 
-    #dont try to open the corrupted ice files 
+     #dont try to open the corrupted ice files
     if runid in ('EPM161', 'ETW162'):
         with open (bad_path+runid+"_bad_ice_files.txt", "r") as file:
             bad_files = eval(file.readline())
@@ -184,6 +183,18 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
     lon = []
     lat = []
 
+    #also need the pre-calculated averages of speed and volume across the section
+    speed_file = xr.open_mfdataset(figs_path+section+'_seaice_transport_speed_avg_'+runid+'.nc')
+    vol_file = xr.open_mfdataset(figs_path+section+'_seaice_transport_vol_avg_'+runid+'.nc')
+
+    speed_avg = speed_file['vel']
+    if lim3:
+        vol_avg = vol_file['__xarray_dataarray_variable__']
+    else:
+        vol_avg = vol_file['iicethic']
+    print(speed_avg)
+    print(vol_avg)
+
     for n in range(0,len(ii)-1):
         i1 = int(ii[n])
         i2 = int(ii[n+1])
@@ -229,12 +240,12 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
 
         if negative:
             total = -v*ice_thick*cell_width
-            speed = -v
-            vol = -ice_thick
+            speed = -v*vol_avg*cell_width
+            vol = -ice_thick*speed_avg*cell_width
         else:
             total = v*ice_thick*cell_width
-            speed = v
-            vol = ice_thick
+            speed = v*vol_avg*cell_width
+            vol = ice_thick*speed_avg*cell_width
 
         total_ice.append(total)
         speed_ice.append(speed)
@@ -250,15 +261,10 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2002, sta
         ice_speed = ice_speed+speed_ice[t]
         ice_vol = ice_vol+vol_ice[t]
 
-    ice_speed = ice_speed/len(total_ice)
-    ice_vol = ice_vol/len(total_ice)
-    print(ice_speed)
-    print(ice_vol)
-
     #and output calcualted data to a netcdf file
-    ice_transport.to_netcdf(figs_path+section+'_seaice_transport_'+runid+'.nc')
-    ice_speed.to_netcdf(figs_path+section+'_seaice_transport_speed_avg_'+runid+'.nc')
-    ice_vol.to_netcdf(figs_path+section+'_seaice_transport_vol_avg_'+runid+'.nc')
+    #ice_transport.to_netcdf(figs_path+section+'_seaice_transport_'+runid+'.nc')
+    ice_speed.to_netcdf(figs_path+section+'_seaice_transport_speed_comp_'+runid+'.nc')
+    ice_vol.to_netcdf(figs_path+section+'_seaice_transport_vol_comp_'+runid+'.nc')
     
     di.close()
 			

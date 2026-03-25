@@ -6,6 +6,8 @@ Calculate the volume, freshwater, heat and salt transport across a section for A
 Need to provide the start and end model grid points, and a straight line in the model grid will be calculated from there
 Outputs netCDF files with the output
 
+NOTE: This is a slightly updated version, which includes some changes to variable names and time decoding to be consistent with new NEMO5 output
+
 """
 import math
 import datetime
@@ -105,8 +107,9 @@ def section_calculation(x0, x1, y0, y1):
 
 def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, startmonth=1, startday=5):
     figs_path = '/project/6007519/weissgib/plotting/transports/'
-    path = "/project/6007519/weissgib/ANHA4/ANHA4-"+runid+"-S/"
-    other_path = '/project/6007519/weissgib/plotting/data_files/anha4_files/'
+    #path = "/project/6007519/weissgib/ANHA4x/ANHA4x-"+runid+"-S/"
+    path = "/project/6007519/weissgib/eORCA025/eORCA025-"+runid+"-S/"
+    other_path = '/project/6007519/weissgib/plotting/data_files/eorca_files/'
     bad_path = '/project/6007519/weissgib/plotting/data_files/bad_files/'
 
     start_time = datetime.date(startyear, startmonth, startday)
@@ -132,17 +135,26 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     mdl_files_u = []
     mdl_files_t = []
     for t in times:
-        mdl_files_v.append(path+"ANHA4-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridV.nc")
-        mdl_files_u.append(path+"ANHA4-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridU.nc")
-        mdl_files_t.append(path+"ANHA4-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridT.nc")
+        mdl_files_v.append(path+"eORCA025-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridV.nc")
+        mdl_files_u.append(path+"eORCA025-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridU.nc")
+        mdl_files_t.append(path+"eORCA025-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridT.nc")
 
     #mdl_files_v = remove_bad_files(bad_path, runid, 'v', mdl_files_v)
     #mdl_files_u = remove_bad_files(bad_path, runid, 'u', mdl_files_u)
     #mdl_files_t = remove_bad_files(bad_path, runid, 't', mdl_files_t)
 
-    dv = xr.open_mfdataset(mdl_files_v, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
-    du = xr.open_mfdataset(mdl_files_u, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
-    dt = xr.open_mfdataset(mdl_files_t, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override')
+    dv = xr.open_mfdataset(mdl_files_v, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override', decode_times=False)
+    du = xr.open_mfdataset(mdl_files_u, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override', decode_times=False)
+    dt = xr.open_mfdataset(mdl_files_t, concat_dim='time_counter', data_vars='minimal', coords='minimal', compat='override', decode_times=False)
+
+    time_convert = nc.num2date(dv['time_counter'].values, dv['time_counter'].units, dv['time_counter'].calendar)
+    dv['time_counter'] = time_convert
+
+    time_convert = nc.num2date(du['time_counter'].values, du['time_counter'].units, du['time_counter'].calendar)
+    du['time_counter'] = time_convert
+
+    time_convert = nc.num2date(dt['time_counter'].values, dt['time_counter'].units, dt['time_counter'].calendar)
+    dt['time_counter'] = time_convert
 
     #take the monthly average to deal with missing files
     dv = dv.resample(time_counter='M').mean()
@@ -154,7 +166,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     print(dt)
 
     #read in the mask file
-    mask_file = other_path+'ANHA4_mesh_mask.nc'
+    #mask_file = other_path+'ANHA4_mesh_mask.nc'
+    mask_file = other_path+'ANHA4x_mesh_mask.nc'
     mf = nc.Dataset(mask_file)
 	
     nav_lon = np.array(mf.variables['nav_lon'])
@@ -168,8 +181,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     mf.close()
 
     #and finally the calcualted cell thickness
-    cell_thickness_u = np.load(other_path+'computed_u_thickness.npy')
-    cell_thickness_v = np.load(other_path+'computed_v_thickness.npy')
+    cell_thickness_u = np.load(other_path+'computed_u_thickness_anha4x.npy')
+    cell_thickness_v = np.load(other_path+'computed_v_thickness_anha4x.npy')
 
     #mask the data
     dv.coords['vmask'] = (('depthv', 'y_grid_V', 'x_grid_V'), vmask[0,:,:,:])
@@ -191,8 +204,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     #section = 'davis_strait_south'
     #ii, jj = section_calculation(175,214,443,443)
 
-    section = 'bering_strait'
-    ii,jj = section_calculation(222, 237, 783, 791)
+    #section = 'bering_strait'
+    #ii,jj = section_calculation(222, 237, 783, 791)
 
     #section = 'nares_strait'
     #ii, jj = section_calculation(197,214,537,522)
@@ -218,11 +231,20 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     #section = 'sib_coast_2'
     #ii, jj = section_calculation(395, 380, 706, 686)
 
+    section = 'boundary_test'
+    ii, jj = section_calculation(33, 429, 900, 900)
+
     t = du.dims['time_counter']
     total_volume = []
     total_freshwater = []
     total_heat = []
     total_salt = []
+
+    #if you want to look at the section, use these too
+    sec_volume = []
+    sec_freshwater = []
+    sec_heat = []
+    sec_salt = []
 
     fw_trans = []
 
@@ -254,7 +276,7 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
             vt = dv['vomecrty']
             v = vt.isel(y_grid_V=j1, x_grid_V=i1)
             v = v.rename('vel')
-            v = v.rename({'depthv': 'depth'})
+            v = v.rename({'depthv': 'depth', 'nav_lon_grid_V': 'nav_lon', 'nav_lat_grid_V': 'nav_lat', 'vmask': 'mask'})
 
             cell_thickness = cell_thickness_u[:,j1,i1]
             cell_width = np.ones(v.shape)*e1v[j1,i1]
@@ -276,7 +298,7 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
             vt = du['vozocrtx']
             v = vt.isel(y_grid_U=j1, x_grid_U=i1)
             v = v.rename('vel')
-            v = v.rename({'depthu': 'depth'})
+            v = v.rename({'depthu': 'depth', 'nav_lon_grid_U': 'nav_lon', 'nav_lat_grid_U': 'nav_lat', 'umask': 'mask'})
             
             cell_thickness = cell_thickness_v[:,j1,i1]
             cell_width = np.ones(v.shape)*e2u[j1,i1]
@@ -297,7 +319,6 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
         fwc = (34.8-sal)/34.8
 
         if negative:
-            print('negative!')
             vol = -v*cell_thickness*cell_width
             fw = -v*fwc*cell_thickness*cell_width
             heat = -v*temp*cell_thickness*cell_width
@@ -308,6 +329,12 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
             heat = v*temp*cell_thickness*cell_width
             salt = v*sal*cell_thickness*cell_width
 
+        #NOTE if you want to look at the transport section, don't sum over depth
+        sec_volume.append(vol)
+        sec_freshwater.append(fw)
+        sec_heat.append(heat)
+        sec_salt.append(salt)
+        
         vl = vol.sum(dim='depth')
         f = fw.sum(dim='depth', skipna=True)
         h = heat.sum(dim='depth')
@@ -318,6 +345,14 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
         total_freshwater.append(f)
         total_heat.append(h)
         total_salt.append(s)
+
+
+    #also for transport section, don't sum over the section
+    #we'll just combine on a new dimension
+    volume_section = xr.concat(sec_volume, dim='sec_loc')
+    #freshwater_section = xr.concat(sec_freshwater, dim='sec_loc')
+    #heat_section = xr.concat(sec_heat, dim='sec_loc')
+    #salt_section = xr.concat(sec_salt, dim='sec_loc')
 
     #now sum the data at each location    
     volume_transport = total_volume[0]
@@ -330,24 +365,28 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
         freshwater_transport = freshwater_transport+total_freshwater[t]
         heat_transport = heat_transport+total_heat[t]
         salt_transport = salt_transport+total_salt[t]
-
+    
     #convert to sverdrups
     volume_transport = volume_transport*0.000001
     freshwater_transport = freshwater_transport*0.000001
     heat_transport = heat_transport*0.000001
-    salt_transport = salt_transport*0.000001
-
-    print(volume_transport.mean(dim='time_counter').values)
+    salt_transport = salt_transport*0.000001  
 
     #and output calcualted data to a netcdf file
-    volume_transport.to_netcdf(figs_path+section+'_volume_transport_'+runid+'.nc')
-    freshwater_transport.to_netcdf(figs_path+section+'_freshwater_transport_'+runid+'.nc')
-    heat_transport.to_netcdf(figs_path+section+'_heat_transport_'+runid+'.nc')
-    salt_transport.to_netcdf(figs_path+section+'_salt_transport_'+runid+'.nc')
+    volume_transport.to_netcdf(figs_path+section+'_volume_transport_anha4x_'+runid+'.nc')
+    #freshwater_transport.to_netcdf(figs_path+section+'_freshwater_transport_anha4x_'+runid+'.nc')
+    #heat_transport.to_netcdf(figs_path+section+'_heat_transport_anha4x_'+runid+'.nc')
+    #salt_transport.to_netcdf(figs_path+section+'_salt_transport_anha4x_'+runid+'.nc')
+
+    #if you made it, also save the section data
+    volume_section.to_netcdf(figs_path+section+'_volume_section_anha4x_'+runid+'.nc')
+    #freshwater_section.to_netcdf(figs_path+section+'_freshwater_section_anha4x_'+runid+'.nc')
+    #heat_section.to_netcdf(figs_path+section+'_heat_section_anha4x_'+runid+'.nc')
+    #salt_section.to_netcdf(figs_path+section+'_salt_section_anha4x_'+runid+'.nc')
     
     dv.close()
     du.close()
 
 if __name__ == "__main__":
-    transport_calculations(runid='ETW510', endyear=2018, endmonth=12, endday=31)
-    #transport_calculations(runid='ETW162', endyear=2018, endmonth=12, endday=31)
+    #transport_calculations(runid='ETW502', endyear=2003, endmonth=12, endday=31, startyear=2002)
+    transport_calculations(runid='ETW501', endyear=2003, endmonth=12, endday=31, startyear=2002)
