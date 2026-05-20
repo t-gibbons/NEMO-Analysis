@@ -7,10 +7,23 @@ import matplotlib.pyplot as plt
 #matplotlib.use('Agg')
 ###----------------------------------###
 
+SMALL_SIZE = 12
+MEDIUM_SIZE = 14
+BIGGER_SIZE = 16
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
+
 figs_path = '/project/6007519/weissgib/plotting/heat/'
 
 #old run
-path_old = '/project/6007519/weissgib/plotting/heat/EPM151_heat_content.nc'
+path_old = '/project/6007519/weissgib/plotting/heat/EPM151_heat_content_new.nc'
 d_nt = xr.open_mfdataset(path_old, chunks={'time_counter': 100})
 datetimeindex = d_nt.indexes['time_counter'].to_datetimeindex()
 d_nt['time_counter'] = datetimeindex
@@ -18,7 +31,7 @@ times_old = datetimeindex.values
 print(d_nt)
 
 #new run 
-path_new = '/project/6007519/weissgib/plotting/heat/ETW161_heat_content.nc'
+path_new = '/project/6007519/weissgib/plotting/heat/ETW161_heat_content_new.nc'
 d_t = xr.open_mfdataset(path_new, chunks={'time_counter': 100})
 datetimeindex = d_t.indexes['time_counter'].to_datetimeindex()
 d_t['time_counter'] = datetimeindex
@@ -80,7 +93,7 @@ for m in masks:
     diff.plot(x='time_counter') 
     #plt.legend()
     plt.title(masks[m])
-    plt.ylabel('Difference in Heat Content')
+    plt.ylabel('Difference in Heat Content (J)')
     plt.tight_layout()
     plt.savefig(figs_path+m+'_heat_content_change_lim2.png')
     plt.clf()

@@ -4,9 +4,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 ###this is for running script backend###
-import matplotlib
-matplotlib.use('Agg')
+#import matplotlib
+#matplotlib.use('Agg')
 ###----------------------------------###
+
+SMALL_SIZE = 10
+MEDIUM_SIZE = 12
+BIGGER_SIZE = 14
+
+plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
+plt.rc('axes', titlesize=BIGGER_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 #constants
 cp = 4.184
@@ -17,7 +29,7 @@ months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct
 figs_path = '/project/6007519/weissgib/plotting/heat/'
 
 #old run
-path_old = '/project/6007519/weissgib/plotting/heat/EPM161_heat_content_new.nc'
+path_old = '/project/6007519/weissgib/plotting/heat/EPM151_heat_content_new.nc'
 d_nt = xr.open_mfdataset(path_old, chunks={'time_counter': 100})
 datetimeindex = d_nt.indexes['time_counter'].to_datetimeindex()
 d_nt['time_counter'] = datetimeindex
@@ -25,7 +37,7 @@ times_old = datetimeindex.values
 print(d_nt)
 
 #new run 
-path_new = '/project/6007519/weissgib/plotting/heat/ETW162_heat_content_new.nc'
+path_new = '/project/6007519/weissgib/plotting/heat/ETW161_heat_content_new.nc'
 d_t = xr.open_mfdataset(path_new, chunks={'time_counter': 100})
 datetimeindex = d_t.indexes['time_counter'].to_datetimeindex()
 d_t['time_counter'] = datetimeindex
@@ -63,7 +75,7 @@ e2t = mask_data['e2t'].sel(z=0)
 #masks = {'full_arctic': 'Arctic'}
 #masks = {'hb_mask': 'Hudson Bay', 'caa_mask': 'Canadian Arctic Archipelago', 'bs_mask': 'Bering Strait', 'bs_east_mask': 'McKenzie River Region', 'laptev_mask': 'Laptev Sea', 'kara_mask': 'Kara Sea', 'nc_mask': 'Northern Coast'}
 
-masks = {'hb_mask': 'Hudson Bay', 'kara_mask': 'Kara Sea'}
+masks = {'bs_mask': 'Beaufort Shelf'}
 
 #lets make some time series over these regions
 for m in masks:
@@ -116,25 +128,27 @@ for m in masks:
     
     corr = np.corrcoef(diff_month, heat_flux)
     print(corr)
-    continue
 
     fig, ax1 = plt.subplots()
 
     #and plot the difference heat content
     
     diff.plot(x='time_counter', color='tab:blue')
+    ax1.set_ylim([-1e18, 7e18])
     ax1.set_ylabel('Difference in Heat Content (J)', color='tab:blue')
+    ax1.set_xlabel('')
 
     #same plot, other axis heat flux
     ax2 = ax1.twinx()
     times = runoff_convert['time_counter'].values
     ax2.plot(times, heat_flux, label='heat flux', color='tab:green')
+    ax2.set_ylim([-1e18, 7e18])
     ax2.set_ylabel('Heat Flux from Runoff (J)', color='tab:green')
 
     fig.tight_layout()
     fig.suptitle(masks[m])
     #plt.show()
-    plt.savefig(figs_path+m+'_heat_content_flux_comp_lim3.png')
+    plt.savefig(figs_path+m+'_heat_content_flux_comp_lim2.png', bbox_inches='tight')
     plt.clf()
 
 d_nt.close()
