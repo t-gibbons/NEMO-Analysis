@@ -107,9 +107,9 @@ def section_calculation(x0, x1, y0, y1):
 
 def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, startmonth=1, startday=5):
     figs_path = '/project/6007519/weissgib/plotting/transports/'
-    #path = "/project/6007519/weissgib/ANHA4x/ANHA4x-"+runid+"-S/"
-    path = "/project/6007519/weissgib/eORCA025/eORCA025-"+runid+"-S/"
-    other_path = '/project/6007519/weissgib/plotting/data_files/eorca_files/'
+    path = "/project/6007519/weissgib/ANHA4x/ANHA4x-"+runid+"-S/"
+    #path = "/project/6007519/weissgib/eORCA025/eORCA025-"+runid+"-S/"
+    other_path = '/project/6007519/weissgib/plotting/data_files/anha4x_files/'
     bad_path = '/project/6007519/weissgib/plotting/data_files/bad_files/'
 
     start_time = datetime.date(startyear, startmonth, startday)
@@ -135,9 +135,9 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     mdl_files_u = []
     mdl_files_t = []
     for t in times:
-        mdl_files_v.append(path+"eORCA025-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridV.nc")
-        mdl_files_u.append(path+"eORCA025-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridU.nc")
-        mdl_files_t.append(path+"eORCA025-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridT.nc")
+        mdl_files_v.append(path+"ANHA4x-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridV.nc")
+        mdl_files_u.append(path+"ANHA4x-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridU.nc")
+        mdl_files_t.append(path+"ANHA4x-"+runid+"_y"+str(t.year)+"m"+str(t.month).zfill(2)+"d"+str(t.day).zfill(2)+"_gridT.nc")
 
     #mdl_files_v = remove_bad_files(bad_path, runid, 'v', mdl_files_v)
     #mdl_files_u = remove_bad_files(bad_path, runid, 'u', mdl_files_u)
@@ -204,8 +204,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     #section = 'davis_strait_south'
     #ii, jj = section_calculation(175,214,443,443)
 
-    #section = 'bering_strait'
-    #ii,jj = section_calculation(222, 237, 783, 791)
+    section = 'bering_strait'
+    ii,jj = section_calculation(222, 237, 783, 791)
 
     #section = 'nares_strait'
     #ii, jj = section_calculation(197,214,537,522)
@@ -231,8 +231,8 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
     #section = 'sib_coast_2'
     #ii, jj = section_calculation(395, 380, 706, 686)
 
-    section = 'boundary_test'
-    ii, jj = section_calculation(33, 429, 900, 900)
+    #section = 'boundary_test'
+    #ii, jj = section_calculation(33, 429, 900, 900)
 
     t = du.dims['time_counter']
     total_volume = []
@@ -374,9 +374,9 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
 
     #and output calcualted data to a netcdf file
     volume_transport.to_netcdf(figs_path+section+'_volume_transport_anha4x_'+runid+'.nc')
-    #freshwater_transport.to_netcdf(figs_path+section+'_freshwater_transport_anha4x_'+runid+'.nc')
-    #heat_transport.to_netcdf(figs_path+section+'_heat_transport_anha4x_'+runid+'.nc')
-    #salt_transport.to_netcdf(figs_path+section+'_salt_transport_anha4x_'+runid+'.nc')
+    freshwater_transport.to_netcdf(figs_path+section+'_freshwater_transport_anha4x_'+runid+'.nc')
+    heat_transport.to_netcdf(figs_path+section+'_heat_transport_anha4x_'+runid+'.nc')
+    salt_transport.to_netcdf(figs_path+section+'_salt_transport_anha4x_'+runid+'.nc')
 
     #if you made it, also save the section data
     volume_section.to_netcdf(figs_path+section+'_volume_section_anha4x_'+runid+'.nc')
@@ -389,4 +389,4 @@ def transport_calculations(runid, endyear, endmonth, endday, startyear=2004, sta
 
 if __name__ == "__main__":
     #transport_calculations(runid='ETW502', endyear=2003, endmonth=12, endday=31, startyear=2002)
-    transport_calculations(runid='ETW501', endyear=2003, endmonth=12, endday=31, startyear=2002)
+    transport_calculations(runid='ETW504', endyear=2018, endmonth=12, endday=31, startyear=1993)
